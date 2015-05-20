@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TheSverre Norgeskart</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+    </style>
+   <script src="proj4.js"></script> 
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>
+
+    <script src="wms.js"></script>
+
+    <script>
+var map;
+function initialize() {
+  var oslo = new google.maps.LatLng(59.91387, 10.75225);
+  var mapOptions = {
+    zoom: 6,
+    center: oslo,
+    rotateControl: true,
+    scaleControl: true,
+    panControl : true,
+    mapTypeId: google.maps.MapTypeId.TERRAIN,
+    mapTypeControl: true,
+    mapTypeControlOptions: {
+      mapTypeIds: [google.maps.MapTypeId.TERRAIN, 'norgeskart'],
+      style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR
+    }
+  };
+  map = new google.maps.Map(document.getElementById('map-canvas'),
+      mapOptions);
+
+
+  
+
+  var imageMapType = new google.maps.ImageMapType({
+    getTileUrl: function(coord, zoom) {
+      var url = 'http://opencache.statkart.no/gatekeeper/gk/gk.open_gmaps?layers=topo2&zoom=' + zoom + '&x=' + coord.x + '&y=' + coord.y;
+    //  url = "http://opencache.statkart.no/gatekeeper/gk/gk.open_wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=europa&STYLE=default&TILEMATRIXSET=EPSG:3857&TILEMATRIX=EPSG:3857:" + zoom+"&TILEROW=" + coord.y + "&TILECOL="+ coord.x + "&FORMAT=image/png";
+//url = "http://openwms.statkart.no/skwms1/wms.topo2?LAYERS=topo2_WMS&TRANSPARENT=TRUE&FORMAT=image/png&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&STYLES=&SRS=EPSG:3857&BBOX=240305.59375,6636239.5234375,280925.59375,6666704.5234375&WIDTH=256&HEIGHT=256";
+      return url;
+    },
+    tileSize: new google.maps.Size(256, 256), 
+    opacity :1,
+    isPng: true,
+    minZoom: 5,
+    maxZoom: 20,
+    name: 'Norgeskart'
+  });
+  map.mapTypes.set('norgeskart', imageMapType);
+ // map.setMapTypeId('norgeskart');
+
+opacityLevel=0.5;
+tileHeight = 2048;
+tileWidth = 2048;
+var customParams = [
+	"FORMAT=image/png",
+	//"LAYERS=topo2_WMS",
+	"SRS=EPSG:900913",
+	"EXCEPTIONS=application%2Fvnd.ogc.se_inimage"
+];
+wmsStandardParams = [
+	"REQUEST=GetMap",
+	"SERVICE=WMS",
+	"VERSION=1.1.1",
+	"TRANSPARENT=TRUE",
+	"WIDTH=384",
+	"HEIGHT=384"
+//	"WIDTH="+ tileWidth,
+//	"HEIGHT="+ tileHeight
+];
+//loadWMS(map, 'http://openwms.statkart.no/skwms1/wms.topo2?', customParams);
+//loadWMS(map, 'http://public-wms.met.no/verportal/verportal.map?LAYERS=clouds_precipitation_regional&', customParams);
+
+
+// Create an ElevationService
+var elevator = new google.maps.ElevationService();
+var infowindow = new google.maps.InfoWindow();
+
+// Add a listener for the click event and call getElevation on that location
+
+google.maps.event.addListener(map, 'click', function(event) {
+  if (map.getZoom() < 8) {
+	return;
+  }
+  var locations = [];
+
+  // Retrieve the clicked location and push it on the array
+  var clickedLocation = event.latLng;
+  locations.push(clickedLocation);
+
+  // Create a LocationElevationRequest object using the array's one value
+  var positionalRequest = {
+    'locations': locations
+  }
+
+  // Initiate the location request
+  elevator.getElevationForLocations(positionalRequest, function(results, status) {
+    if (status == google.maps.ElevationStatus.OK) {
+
+      // Retrieve the first result
+      if (results[0]) {
+
+        // Open an info window indicating the elevation at the clicked position
+        infowindow.setContent('The elevation at ' + event.latLng +' <br>is ' + Math.round(results[0].elevation) + ' meters. ' );
+        infowindow.setPosition(clickedLocation);
+        infowindow.open(map);
+      } else {
+        alert('No results found');
+      }
+    } else {
+      alert('Elevation service failed due to: ' + status);
+    }
+  });
+});
+
+
+var norgeskartBounds = new google.maps.LatLngBounds(
+    new google.maps.LatLng(57.5, 3),
+    new google.maps.LatLng(71, 31.5));
+
+google.maps.event.addListener( map, 'maptypeid_changed', function() { 
+ if (map.getMapTypeId() == 'norgeskart') {
+        if (!norgeskartBounds.contains(map.getBounds().getCenter())) {
+            map.panToBounds(norgeskartBounds);
+            map.setZoom(5);
+            return;
+        }
+
+ }
+} );
+
+}
+
+
+
+
+google.maps.event.addDomListener(window, 'load', initialize);
+
+
+
+    </script>
+  </head>
+  <body>
+Map of Norway
+    <div id="map-canvas"></div>
+  </body>
+</html>
