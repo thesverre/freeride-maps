@@ -11,7 +11,6 @@
         padding: 0px
       }
     </style>
-   <script src="proj4.js"></script> 
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>
 
     <script src="wms.js"></script>
@@ -26,10 +25,10 @@ function initialize() {
     rotateControl: true,
     scaleControl: true,
     panControl : true,
-    mapTypeId: google.maps.MapTypeId.TERRAIN,
+    mapTypeId: 'norgeskart',
     mapTypeControl: true,
     mapTypeControlOptions: {
-      mapTypeIds: [google.maps.MapTypeId.TERRAIN, 'norgeskart'],
+      mapTypeIds: [google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.TERRAIN, 'norgeskart'],
       style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR
     }
   };
@@ -54,29 +53,21 @@ function initialize() {
     name: 'Norgeskart'
   });
   map.mapTypes.set('norgeskart', imageMapType);
- // map.setMapTypeId('norgeskart');
 
-opacityLevel=0.5;
-tileHeight = 2048;
-tileWidth = 2048;
-var customParams = [
-	"FORMAT=image/png",
-	//"LAYERS=topo2_WMS",
-	"SRS=EPSG:900913",
-	"EXCEPTIONS=application%2Fvnd.ogc.se_inimage"
-];
-wmsStandardParams = [
-	"REQUEST=GetMap",
-	"SERVICE=WMS",
-	"VERSION=1.1.1",
-	"TRANSPARENT=TRUE",
-	"WIDTH=384",
-	"HEIGHT=384"
-//	"WIDTH="+ tileWidth,
-//	"HEIGHT="+ tileHeight
-];
+
+
 //loadWMS(map, 'http://openwms.statkart.no/skwms1/wms.topo2?', customParams);
-//loadWMS(map, 'http://public-wms.met.no/verportal/verportal.map?LAYERS=clouds_precipitation_regional&', customParams);
+loadWMS(map, 'http://public-wms.met.no/verportal/verportal.map?LAYERS=clouds_precipitation_regional&WIDTH=1024&HEIGHT=1024&' + getWmsStandardParams(), 
+	{tileWidth: 1024, 
+	tileHeight: 1024,
+        opacity : 0.5,
+        maxZoomVisible: 10});
+
+loadWMS(map, 'http://public-wms.met.no/verportal/verportal.map?LAYERS=clouds_precipitation_regional&WIDTH=384&HEIGHT=384&' + getWmsStandardParams(), 
+	{tileWidth: 1048, 
+	tileHeight: 1048,
+        opacity : 0.5,
+        minZoomVisible: 11});
 
 
 // Create an ElevationService
