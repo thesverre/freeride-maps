@@ -10,8 +10,32 @@
         margin: 0px;
         padding: 0px
       }
+      ul {
+        margin: 0;
+        padding: 0;
+      }
+      li {
+        list-style-type:none;
+      }
+      .active {
+       font-weight:bold;
+      }
+      .layer {
+       padding: 2px;
+       cursor : pointer;
+      }
+      .controlpanel {
+       margin: 10px;
+       background-color: #fff;
+       border: 2px solid #fff;
+       padding-left: 10px;
+       width: 200px;
+       border-radius: '3px';
+       box-shadow : 0 2px 6px rgba(0,0,0,.3);
+      }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true"></script>
+    <script src="jquery-1.11.3.min.js"></script>
 
     <script src="wms.js"></script>
 
@@ -24,7 +48,7 @@ function initialize() {
     center: oslo,
     rotateControl: true,
     scaleControl: true,
-    panControl : true,
+    panControl : false,
     mapTypeId: 'norgeskart',
     mapTypeControl: true,
     mapTypeControlOptions: {
@@ -57,18 +81,12 @@ function initialize() {
 
 
 //loadWMS(map, 'http://openwms.statkart.no/skwms1/wms.topo2?', customParams);
-loadWMS(map, 'http://public-wms.met.no/verportal/verportal.map?LAYERS=clouds_precipitation_regional&WIDTH=1024&HEIGHT=1024&' + getWmsStandardParams(), 
-	{tileWidth: 1024, 
-	tileHeight: 1024,
-        opacity : 0.5,
-        maxZoomVisible: 10});
 
-loadWMS(map, 'http://public-wms.met.no/verportal/verportal.map?LAYERS=clouds_precipitation_regional&WIDTH=384&HEIGHT=384&' + getWmsStandardParams(), 
-	{tileWidth: 1048, 
-	tileHeight: 1048,
-        opacity : 0.5,
-        minZoomVisible: 11});
+var controlPanelDiv = document.createElement('div');
+var controlPanel = new ControlPanel(controlPanelDiv, map);
 
+controlPanelDiv.index = 1;
+map.controls[google.maps.ControlPosition.TOP_LEFT].push(controlPanelDiv);
 
 // Create an ElevationService
 var elevator = new google.maps.ElevationService();
@@ -135,6 +153,63 @@ google.maps.event.addListener( map, 'maptypeid_changed', function() {
 google.maps.event.addDomListener(window, 'load', initialize);
 
 
+function ControlPanel(controlDiv, map) {
+
+  // Set CSS for the control border
+  var controlUI = document.createElement('div');
+ controlUI.className='controlpanel';
+  controlDiv.appendChild(controlUI);
+
+  var header = document.createElement('h2');
+  header.innerHTML = "Layers";
+  controlUI.appendChild(header);
+
+
+  // Set CSS for the control interior
+  var ui = document.createElement('ul');
+  ui.appendChild(addLayer('clouds_precipitation_regional', 'Clouds')); 
+  ui.appendChild(addLayer('swewk', 'Snow change last week')); 
+  ui.appendChild(addLayer('none', 'None', true)); 
+  controlUI.appendChild(ui);
+
+}
+
+function addLayer(layerId, name, active ) {
+var li = document.createElement('ul');
+li.className='layer';
+if (active) {
+li.className +=' active';
+}
+li.innerHTML = name;
+google.maps.event.addDomListener(li, 'click', function() {
+	map.overlayMapTypes.clear(); 
+  $('.active').removeClass('active');
+  $(this).addClass('active');
+  if (layerId == 'clouds_precipitation_regional') {
+    loadWMS(map, 'http://public-wms.met.no/verportal/verportal.map?LAYERS=clouds_precipitation_regional&WIDTH=1024&HEIGHT=1024&' + getWmsStandardParams(), 
+		{tileWidth: 1024, 
+		tileHeight: 1024,
+		opacity : 0.5,
+		maxZoomVisible: 10});
+
+     loadWMS(map, 'http://public-wms.met.no/verportal/verportal.map?LAYERS=clouds_precipitation_regional&WIDTH=384&HEIGHT=384&' + getWmsStandardParams(), 
+		{tileWidth: 1048, 
+		tileHeight: 1048,
+		opacity : 0.5,
+		minZoomVisible: 11});
+  } else if(layerId == 'swewk') { 
+     loadWMS(map, 'http://gridwms.nve.no/WMS_server/wms_server.aspx?time=2015-05-21&custRefresh=0.32115649268962443&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&STYLES=&VERSION=1.1.1&LAYERS=swewk&WIDTH=1151&HEIGHT=1028&SRS=EPSG:32633&', 
+		{tileWidth: 2048, 
+		tileHeight: 2048,
+		opacity : 0.5});
+
+
+  }
+  
+
+  });
+return li;
+}
 
     </script>
   </head>
