@@ -83,14 +83,13 @@ function loadWMS(map, baseURL, options) {
         getTileUrl: function(coord, zoom) {
 
 	    if (options.maxZoomVisible && zoom > options.maxZoomVisible) {
-  console.log('options.maxZoomVisible', options.maxZoomVisible, zoom);
 		return null;
 	    }
 	    if (options.minZoomVisible && zoom < options.minZoomVisible) {
 		  console.log('options.minZoomVisible', options.minZoomVisible, zoom);
 		return null;
 	    }
-  console.log(baseURL, coord, zoom, minZoom, maxZoom);
+
             var lULP = new google.maps.Point(coord.x*tileWidth,(coord.y+1)*tileHeight);
             var lLRP = new google.maps.Point((coord.x+1)*tileWidth,coord.y*tileHeight);
 
@@ -107,6 +106,28 @@ function loadWMS(map, baseURL, options) {
             if (lLR_Longitude < lUL_Longitude) {
               lLR_Longitude = Math.abs(lLR_Longitude);
             }
+
+	    if (true) {
+//               console.log('org', lUL_Longitude , lUL_Latitude ,lLR_Longitude,lLR_Latitude);
+//	       console.log('epsg3875', lUL_Longitude , lUL_Latitude);
+ 	       var ws84 = proj4(epsg3857).inverse([lUL_Longitude, lUL_Latitude ]);
+	       console.log('ws84UL', ws84[1] + " " + ws84[0]);
+//	       console.log('epsg32633', proj4(epsg32633).forward(ws84));
+ //              var  c = proj4(epsg3857, epsg32633).forward([lUL_Longitude, lUL_Latitude]); 
+	       var c = proj4(epsg32633).forward(ws84);
+               lUL_Longitude = c[0];	       	
+               lUL_Latitude = c[1];
+ 	       var ws84 = proj4(epsg3857).inverse([lLR_Longitude, lLR_Latitude ]);
+	
+	       console.log('ws84LR', ws84[1] + " " + ws84[0]);
+	       var c = proj4(epsg32633).forward(ws84);
+//var  c = proj4(epsg3857, epsg32633).forward([lLR_Longitude, lLR_Latitude]); 
+               lLR_Longitude = c[0];
+               lLR_Latitude = c[1];
+
+	       //console.log('post', lUL_Longitude , lUL_Latitude ,lLR_Longitude,lLR_Latitude);
+            }
+
             var urlResult = baseURL + "&bbox=" + lUL_Longitude + "," + lUL_Latitude + "," + lLR_Longitude + "," + lLR_Latitude;
             return urlResult;
         },
@@ -121,10 +142,11 @@ function loadWMS(map, baseURL, options) {
     };
 
     overlayWMS = new google.maps.ImageMapType(overlayOptions);
-
+    overlayWMS.layerId = options.layerId;
     //map.overlayMapTypes.insertAt(0, overlayWMS);
 	map.overlayMapTypes.push(overlayWMS);
 }
+
 
 function getWmsStandardParams() {
 return [
