@@ -97,35 +97,17 @@ function loadWMS(map, baseURL, options) {
 
             var lULg = projectionMap.fromDivPixelToSphericalMercator(lULP, zoom);
             var lLRg  = projectionMap.fromDivPixelToSphericalMercator(lLRP, zoom);
-
             var lUL_Latitude = lULg.y;
             var lUL_Longitude = lULg.x;
             var lLR_Latitude = lLRg.y;
             var lLR_Longitude = lLRg.x;
+
+
+
+           
             //GJ: there is a bug when crossing the -180 longitude border (tile does not render) - this check seems to fix it
             if (lLR_Longitude < lUL_Longitude) {
               lLR_Longitude = Math.abs(lLR_Longitude);
-            }
-
-	    if (true) {
-//               console.log('org', lUL_Longitude , lUL_Latitude ,lLR_Longitude,lLR_Latitude);
-//	       console.log('epsg3875', lUL_Longitude , lUL_Latitude);
- 	       var ws84 = proj4(epsg3857).inverse([lUL_Longitude, lUL_Latitude ]);
-	       console.log('ws84UL', ws84[1] + " " + ws84[0]);
-//	       console.log('epsg32633', proj4(epsg32633).forward(ws84));
- //              var  c = proj4(epsg3857, epsg32633).forward([lUL_Longitude, lUL_Latitude]); 
-	       var c = proj4(epsg32633).forward(ws84);
-               lUL_Longitude = c[0];	       	
-               lUL_Latitude = c[1];
- 	       var ws84 = proj4(epsg3857).inverse([lLR_Longitude, lLR_Latitude ]);
-	
-	       console.log('ws84LR', ws84[1] + " " + ws84[0]);
-	       var c = proj4(epsg32633).forward(ws84);
-//var  c = proj4(epsg3857, epsg32633).forward([lLR_Longitude, lLR_Latitude]); 
-               lLR_Longitude = c[0];
-               lLR_Latitude = c[1];
-
-	       //console.log('post', lUL_Longitude , lUL_Latitude ,lLR_Longitude,lLR_Latitude);
             }
 
             var urlResult = baseURL + "&bbox=" + lUL_Longitude + "," + lUL_Latitude + "," + lLR_Longitude + "," + lLR_Latitude;
@@ -158,5 +140,64 @@ return [
 	"VERSION=1.1.1",
 	"TRANSPARENT=TRUE"
 ].join("&");
+}
+
+function calculateBbox(coord, zoom, tileWidth, tileHeight) {
+  var lULP = new google.maps.Point(coord.x*tileWidth,(coord.y+1)*tileHeight);
+  var lLRP = new google.maps.Point((coord.x+1)*tileWidth,coord.y*tileHeight);
+
+  var projectionMap = new MercatorProjection();
+
+	      var lULg = projectionMap.fromDivPixelToLatLng(lULP, zoom);
+              var lLRg  = projectionMap.fromDivPixelToLatLng(lLRP, zoom);
+              var lUL_Latitude = lULg.lat();
+              var lUL_Longitude = lULg.lng();
+              var lLR_Latitude = lLRg.lat();
+              var lLR_Longitude = lLRg.lng();
+              var c = proj4(epsg32633).forward([lUL_Longitude, lUL_Latitude]);
+console.log('d', c, [lUL_Longitude, lUL_Latitude],lULg )
+              lUL_Longitude = c[0];	       	
+              lUL_Latitude = c[1];
+              var c = proj4(epsg32633).forward([lLR_Longitude, lLR_Latitude]);
+              lLR_Longitude = c[0];	       	
+              lLR_Latitude = c[1];
+
+   return lUL_Longitude + "," + lUL_Latitude + "," + lLR_Longitude + "," + lLR_Latitude;
+
+ if (false) {
+/*
+//               console.log('org', lUL_Longitude , lUL_Latitude ,lLR_Longitude,lLR_Latitude);
+//	       console.log('epsg3875', lUL_Longitude , lUL_Latitude);
+ 	       var ws84 = proj4(epsg3857).inverse([lUL_Longitude, lUL_Latitude ]);
+	       console.log('ws84UL', ws84[1] + " " + ws84[0]);
+//	       console.log('epsg32633', proj4(epsg32633).forward(ws84));
+ //              var  c = proj4(epsg3857, epsg32633).forward([lUL_Longitude, lUL_Latitude]); 
+	       var c = proj4(epsg32633).forward(ws84);
+               lUL_Longitude = c[0];	       	
+               lUL_Latitude = c[1];
+ 	       var ws84 = proj4(epsg3857).inverse([lLR_Longitude, lLR_Latitude ]);
+	
+	       console.log('ws84LR', ws84[1] + " " + ws84[0]);
+	       var c = proj4(epsg32633).forward(ws84);
+//var  c = proj4(epsg3857, epsg32633).forward([lLR_Longitude, lLR_Latitude]); 
+               lLR_Longitude = c[0];
+               lLR_Latitude = c[1];
+*/
+
+	       //console.log('post', lUL_Longitude , lUL_Latitude ,lLR_Longitude,lLR_Latitude);
+	      var lULg = projectionMap.fromDivPixelToLatLng(lULP, zoom);
+              var lLRg  = projectionMap.fromDivPixelToLatLng(lLRP, zoom);
+              var lUL_Latitude = lULg.lat();
+              var lUL_Longitude = lULg.lng();
+              var lLR_Latitude = lLRg.lat();
+              var lLR_Longitude = lLRg.lng();
+              var c = proj4(epsg32633).forward([lUL_Longitude, lUL_Latitude]);
+console.log('d', c, [lUL_Longitude, lUL_Latitude],lULg )
+              lUL_Longitude = c[0];	       	
+              lUL_Latitude = c[1];
+              var c = proj4(epsg32633).forward([lLR_Longitude, lLR_Latitude]);
+              lLR_Longitude = c[0];	       	
+              lLR_Latitude = c[1];
+            }
 }
 
