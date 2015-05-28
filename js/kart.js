@@ -4,7 +4,10 @@ var epsg3857 = proj4('EPSG:3857');
 var epsg32633 = proj4('EPSG:32633');
 
 var map;
+var geocoder;
+
 function initializeMap() {
+  geocoder = new google.maps.Geocoder();
   var oslo = new google.maps.LatLng(59.91387, 10.75225);
   var mapOptions = {
     zoom: 6,
@@ -86,7 +89,6 @@ function initializeMap() {
 
 google.maps.event.addListener(map, 'click', onClickMap);
 }
-
 
 
 
