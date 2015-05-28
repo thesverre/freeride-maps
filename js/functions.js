@@ -23,6 +23,14 @@ function onClickMap(event) {
 
         // Open an info window indicating the elevation at the clicked position
 	var  img = getImg('http://gridwms.nve.no/WMS_server/wms_server.aspx?time=2014-04-15&custRefresh=0.1345073445700109&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&STYLES=&VERSION=1.1.1&LAYERS=swewk&WIDTH=256&HEIGHT=256&SRS=EPSG:32633&BBOX=', map.getBounds().getSouthWest(), map.getBounds().getNorthEast());
+
+
+
+img =addMetChart(clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=none&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};swewk,cht=col,mth=inst&nocache=0.7853575034532696', -10, 5, 700, 300);
+
+img +=addMetChart(clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=desc&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};fsw,cht=stckcol,mth=inst,clr=%233399FF|ds=hgts,da=29,id={pos};qsw,cht=stckcol,grp=1,mth=inst,clr=%23FF9933|ds=hgts,da=29,id={pos};qtt,cht=stckcol,grp=1,mth=inst,clr=red|ds=hgts,da=29,id={pos};tam,cht=line,mth=inst,drwd=3,clr=%23FF9933&nocache=0.2664557103998959', -20, 5, 700, 500);
+
+//http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time=20150505T0000;20150603T0000&chs=400x150&lang=no&chlf=desc&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id=203339;6800557;fsw,cht=stckcol,mth=inst,clr=%233399FF|ds=hgts,da=29,id=203339;6800557;qsw,cht=stckcol,grp=1,mth=inst,clr=%23FF9933|ds=hgts,da=29,id=203339;6800557;qtt,cht=stckcol,grp=1,mth=inst,clr=red|ds=hgts,da=29,id=203339;6800557;tam,cht=line,mth=inst,drwd=3,clr=%23FF9933&nocache=0.2664557103998959
         infowindow.setContent('The elevation at ' + event.latLng +' <br>is ' + Math.round(results[0].elevation) + ' meters. ' + img);
         infowindow.setPosition(clickedLocation);
         infowindow.open(map);
@@ -35,7 +43,29 @@ function onClickMap(event) {
   });
 }
 
+function addMetChart(latLng, url, fromDays, toDays, width, height) {
+  var p = proj4(epsg32633).forward([ latLng.lng(), latLng.lat() ]);
+  var pos = p[0] + ";" + p[1];
+  var fromDate = toDateString(addDays(new Date(), fromDays));
+  var toDate = toDateString(addDays(new Date(), toDays));  
+console.log(fromDate);
+  url = url.replace(/\{fromdate}/g, fromDate);
+  url = url.replace(/\{todate}/g, toDate);
+  url = url.replace(/\{pos}/g, pos);
+  url = url.replace(/\{width}/g, width);
+  url = url.replace(/\{height}/g, height);
+  return '<img width=' + width+ ' height='+ height +' src="'+ url +'">';
+}
 
+
+function addDays(date, days) {
+    var result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+}
+function toDateString(date) {
+  return date.getFullYear() + '' + preZero((date.getMonth() + 1)) + '' + preZero(date.getDate());
+}
 
 function getImg(url, latSw, latNe) {
 	var bbox = getBbox(epsg32633, latSw, latNe);
@@ -80,6 +110,7 @@ function ControlPanel(controlDiv, map) {
   ui.appendChild(addLayer('radar_precipitation_intensity', 'Radar')); 
   ui.appendChild(addLayer('temperature_2m_regional', 'Temperatur')); 
   ui.appendChild(addLayer('wind_10m_regional', 'Vind')); 
+  ui.appendChild(addLayer('skred', 'Skredfare')); 
   ui.appendChild(addLayer('none', 'Ingen', true)); 
   controlUI.appendChild(ui);
 
@@ -104,6 +135,16 @@ function addLayer(layerId, name, active ) {
 			addYrLayer('temperature_2m_regional');
 		} else if (layerId == 'wind_10m_regional') {
 			addYrLayer('wind_10m_regional');
+		} else if (layerId == 'skred') {
+			addYrLayer('skred');
+		loadWMS(map, 'http://gis3.nve.no/map/rest/services/SkredSnoAktR/MapServer/export?dpi=96&transparent=true&format=png8&bboxSR=3857&imageSR=3857&size=1024%2C1024&layers=show%3A0&f=image&', {
+		tileWidth : 1024,
+		tileHeight : 1024,
+		opacity : 0.5,
+		maxZoomVisible : 10
+		});
+
+
 		}
 
 	});
@@ -111,12 +152,6 @@ function addLayer(layerId, name, active ) {
 }
 
 function addYrLayer(layerId) {
-	function preZero(d) {
-		if (d < 10) {
-			return '0' + d;
-		}
-		return d;
-	}
 	var d = new Date();
 	var time = d.getUTCFullYear() + "-" + preZero((d.getUTCMonth() + 1)) + "-"
 			+ preZero(d.getUTCDate()) + "T" + d.getUTCHours() + ":00Z";
@@ -137,4 +172,11 @@ function addYrLayer(layerId) {
 		opacity : 0.5,
 		minZoomVisible : 11
 	});
+}
+
+function preZero(d) {
+	if (d < 10) {
+		return '0' + d;
+	}
+	return d;
 }
