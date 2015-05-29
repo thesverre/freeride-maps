@@ -5,6 +5,7 @@ var epsg32633 = proj4('EPSG:32633');
 
 var map;
 var geocoder;
+var marker;
 
 function initializeMap() {
   geocoder = new google.maps.Geocoder();
@@ -100,7 +101,19 @@ function initializeMap() {
 	}
   });
 
-google.maps.event.addListener(map, 'click', onClickMap);
+google.maps.event.addListener(map, 'click', function(event) {
+if (!marker) {
+marker = new google.maps.Marker({
+    map: map,
+    draggable: false,
+    position: event.latLng
+  });
+} else {
+marker.setPosition(event.latLng);
+}
+
+onClickMap(event.latLng);
+});
 
 var markers = [];
 google.maps.event.addListener(map, 'bounds_changed', function() {
@@ -116,7 +129,12 @@ google.maps.event.addListener(searchBox, 'places_changed', function() {
     for (var i = 0, marker; marker = markers[i]; i++) {
       marker.setMap(null);
     }
-
+    if (places.length == 1) {
+	map.setCenter(places[0].geometry.location);
+        map.setZoom(12);
+	onClickMap(places[0].geometry.location);
+        return;
+    }
     // For each place, get the icon, place name, and location.
     markers = [];
     var bounds = new google.maps.LatLngBounds();
@@ -137,14 +155,16 @@ google.maps.event.addListener(searchBox, 'places_changed', function() {
 	clickable: true,
         position: place.geometry.location
       });
-google.maps.event.addListener(marker, 'click', onClickMap);
+google.maps.event.addListener(marker, 'click', function() {
+console.log('marker', event)
+});
 
       markers.push(marker);
 
       bounds.extend(place.geometry.location);
     }
-    
     map.fitBounds(bounds);
+    
   });
 
 }

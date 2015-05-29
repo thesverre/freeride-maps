@@ -1,11 +1,9 @@
-var marker;
-function onClickMap(event) {
+function onClickMap(clickedLocation) {
   // Create an ElevationService
   var elevator = new google.maps.ElevationService();
   //var infowindow = new google.maps.InfoWindow();
   var locations = [];
   // Retrieve the clicked location and push it on the array
-  var clickedLocation = event.latLng;
   locations.push(clickedLocation);
 
 
@@ -13,15 +11,6 @@ function onClickMap(event) {
   var positionalRequest = {
     'locations': locations
   }
-if (!marker) {
-marker = new google.maps.Marker({
-    map: map,
-    draggable: false,
-    position: clickedLocation
-  });
-} else {
-marker.setPosition(clickedLocation);
-}
 
   // Initiate the location request
   elevator.getElevationForLocations(positionalRequest, function(results, status) {
@@ -45,7 +34,7 @@ img +=addMetChart(clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.
         //infowindow.setContent('The elevation at ' + event.latLng +' <br>is ' + Math.round(results[0].elevation) + ' meters. ' + img);
         $('#controlPanel').hide();
 	$('#contentInfo').fadeIn();
-	$('#contentInfo').html('The elevation at ' + event.latLng +' <br>is ' + Math.round(results[0].elevation) + ' meters. ' + img);
+	$('#contentInfo').html('The elevation at ' + clickedLocation +' <br>is ' + Math.round(results[0].elevation) + ' meters. ' + img);
         //infowindow.setPosition(clickedLocation);
         //infowindow.open(map);
       } else {
