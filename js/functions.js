@@ -5,7 +5,8 @@ function onClickMap(clickedLocation) {
   var locations = [];
   // Retrieve the clicked location and push it on the array
   locations.push(clickedLocation);
-
+ 
+// http://www.yr.no/_/websvc/latlon2p.aspx?lat=59.91&lon=10.78&spr=nob
 
   // Create a LocationElevationRequest object using the array's one value
   var positionalRequest = {
@@ -21,20 +22,25 @@ function onClickMap(clickedLocation) {
 
         // Open an info window indicating the elevation at the clicked position
 	map.setCenter(clickedLocation);
-	var  img = addSnoLayer('swewk', 'Snø endring siste uke');
-	img += addSnoLayer('sd', 'Snødybde');
-	img += addSnoLayer('lwc', 'Snøtilstand');
-	img += addSnoLayer('sdfs', 'Nysnødybde');
+	var  img = ''; 
 
 
-img +=addMetChart(clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=none&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};swewk,cht=col,mth=inst&nocache=0.7853575034532696', -10, 5, 700, 300);
+img +=addMetChart("Nysnø siste 20 dager + 10 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=none&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};swewk,cht=col,mth=inst&nocache=0.7853575034532696', -10, 5, 700, 300);
 
-img +=addMetChart(clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=desc&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};fsw,cht=stckcol,mth=inst,clr=%233399FF|ds=hgts,da=29,id={pos};qsw,cht=stckcol,grp=1,mth=inst,clr=%23FF9933|ds=hgts,da=29,id={pos};qtt,cht=stckcol,grp=1,mth=inst,clr=red|ds=hgts,da=29,id={pos};tam,cht=line,mth=inst,drwd=3,clr=%23FF9933&nocache=0.2664557103998959', -20, 5, 700, 500);
+img +=addMetChart("Nedbør og temperatur siste 10 dager + 5 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=desc&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};fsw,cht=stckcol,mth=inst,clr=%233399FF|ds=hgts,da=29,id={pos};qsw,cht=stckcol,grp=1,mth=inst,clr=%23FF9933|ds=hgts,da=29,id={pos};qtt,cht=stckcol,grp=1,mth=inst,clr=red|ds=hgts,da=29,id={pos};tam,cht=line,mth=inst,drwd=3,clr=%23FF9933&nocache=0.2664557103998959', -20, 5, 700, 500);
+
+img +=addSnoLayer('swewk', 'Snø endring siste uke');
+img += addSnoLayer('sd', 'Snødybde');
+img += addSnoLayer('lwc', 'Snøtilstand');
+img += addSnoLayer('sdfsw', 'Nysnødybde');
+
 	
         //infowindow.setContent('The elevation at ' + event.latLng +' <br>is ' + Math.round(results[0].elevation) + ' meters. ' + img);
+
+var closeButton = '<div onclick="closeClickMap()" class="close-button">X</div><div style="clear:both"></div>';
         $('#controlPanel').hide();
 	$('#contentInfo').fadeIn();
-	$('#contentInfo').html('The elevation at ' + clickedLocation +' <br>is ' + Math.round(results[0].elevation) + ' meters. ' + img);
+	$('#contentInfo').html('<div style="float:left"><h2>' + clickedLocation +' <br>is ' + Math.round(results[0].elevation) + ' meters.</h2></div>' + closeButton + img);
         //infowindow.setPosition(clickedLocation);
         //infowindow.open(map);
       } else {
@@ -46,12 +52,19 @@ img +=addMetChart(clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.
   });
 }
 
+function closeClickMap() {
+  $('#contentInfo').hide();
+  $('#controlPanel').fadeIn();
+  marker.setMap(null);
+  marker = null;
+}
+
 function addSnoLayer(layer, name) {
 var date = toDateStringISO(new Date());
 return getImg('http://gridwms.nve.no/WMS_server/wms_server.aspx?time=' + date + '&custRefresh=0.1345073445700109&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&STYLES=&VERSION=1.1.1&LAYERS='+ layer +'&SRS=EPSG:32633&BBOX=', map.getBounds().getSouthWest(), map.getBounds().getNorthEast(), name);
 }
 
-function addMetChart(latLng, url, fromDays, toDays, width, height) {
+function addMetChart(name, latLng, url, fromDays, toDays, width, height) {
   var p = proj4(epsg32633).forward([ latLng.lng(), latLng.lat() ]);
   var pos = p[0] + ";" + p[1];
   var fromDate = toDateString(addDays(new Date(), fromDays));
@@ -61,7 +74,7 @@ function addMetChart(latLng, url, fromDays, toDays, width, height) {
   url = url.replace(/\{pos}/g, pos);
   url = url.replace(/\{width}/g, width);
   url = url.replace(/\{height}/g, height);
-  return '<img width=' + width+ ' height='+ height +' src="'+ url +'">';
+  return '<h3>' + name + '</h3><img width=100% src="'+ url +'">';
 }
 
 
@@ -93,8 +106,8 @@ var height = Math.round(document.getElementById('map-canvas').offsetHeight / 2);
 	var nw = proj4(epsg32633).forward([ latNe.lng(), latNe.lat() ]);
 	var r = "<h3>" + name + "</h3>";
 	r += '<div class="imagediv">';
-	r += "<img  src='" + baseImage + "' width=700>";
-	r += "<img class=layerImg src='" + url + "' width=700>";
+	r += "<img  src='" + baseImage + "' width=100%>";
+	r += "<img class=layerImg src='" + url + "' width=100%>";
 	r += '</div>';
 	return r;
 }

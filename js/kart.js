@@ -69,29 +69,30 @@ function initializeMap() {
 
   var input = /** @type {HTMLInputElement} */(
       document.getElementById('pac-input'));
-  map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
 
   var searchBox = new google.maps.places.SearchBox(
     /** @type {HTMLInputElement} */(input));	
+  input.index=1;
+  map.controls[google.maps.ControlPosition.LEFT_TOP].push(input);
 
   var controlPanelDiv = document.createElement('div');
   controlPanelDiv.id = 'controlPanel';
   var controlPanel = new ControlPanel(controlPanelDiv, map);
 
-  controlPanelDiv.index = 1;
-  map.controls[google.maps.ControlPosition.TOP_LEFT].push(controlPanelDiv);
+  controlPanelDiv.index = 2;
+  map.controls[google.maps.ControlPosition.LEFT_TOP].push(controlPanelDiv);
 
   var div = document.createElement('div');
   div.id ='contentInfo';
-  div.index = 2;
-  map.controls[google.maps.ControlPosition.TOP_LEFT].push(div);
-
+  div.index = 3;
+  map.controls[google.maps.ControlPosition.LEFT_TOP].push(div);
 
   var norgeskartBounds = new google.maps.LatLngBounds(new google.maps.LatLng(
 			57.5, 3), new google.maps.LatLng(71, 31.5));
 
   google.maps.event.addListener(map, 'maptypeid_changed', function() {
-	if (map.getMapTypeId() == 'norgeskart') {
+	if (map.getMapTypeId() == 'statkart_topo2' || map.getMapTypeId() == 'statkart_raster' ) {
 		if (!norgeskartBounds.contains(map.getBounds().getCenter())) {
 			map.panToBounds(norgeskartBounds);
 			map.setZoom(5);
@@ -102,18 +103,22 @@ function initializeMap() {
   });
 
 google.maps.event.addListener(map, 'click', function(event) {
+setOnclickMarker(event.latLng);
+onClickMap(event.latLng);
+});
+
+function setOnclickMarker(latLng) {
 if (!marker) {
 marker = new google.maps.Marker({
     map: map,
     draggable: false,
-    position: event.latLng
+    position: latLng
   });
 } else {
-marker.setPosition(event.latLng);
+marker.setPosition(latLng);
 }
 
-onClickMap(event.latLng);
-});
+}
 
 var markers = [];
 google.maps.event.addListener(map, 'bounds_changed', function() {
@@ -132,6 +137,7 @@ google.maps.event.addListener(searchBox, 'places_changed', function() {
     if (places.length == 1) {
 	map.setCenter(places[0].geometry.location);
         map.setZoom(12);
+	setOnclickMarker(places[0].geometry.location);
 	onClickMap(places[0].geometry.location);
         return;
     }
@@ -156,7 +162,6 @@ google.maps.event.addListener(searchBox, 'places_changed', function() {
         position: place.geometry.location
       });
 google.maps.event.addListener(marker, 'click', function() {
-console.log('marker', event)
 });
 
       markers.push(marker);

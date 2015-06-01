@@ -23,7 +23,7 @@ li {
 }
 
 .controlpanel {
-	margin: 10px;
+	margin: 12px;
 	background-color: #fff;
 	border: 2px solid #fff;
 	padding-left: 10px;
@@ -44,18 +44,19 @@ li {
 	opacity: 0.5;
 }
 #contentInfo {
-        margin: 10px;
-        margin-top: 30px;
+        margin-left: 12px;
 	background-color: #fff;
 	border: 2px solid #fff;
 	padding-left: 10px;
+        margin-top: 12px;
         display:none;
-	width: 200px;
 	border-radius: '3px';
 	box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
-    width: 730px;
+    width: 400px;
     height: 90%;
-    overflow: scroll;
+    overflow-x: hidden;
+    overflow-y: auto;
+  background-clip: padding-box;
 }
 
 #pac-input {
@@ -63,6 +64,7 @@ li {
         font-family: Roboto;
         font-size: 15px;
         font-weight: 300;
+        margin-top: 12px;
         margin-left: 12px;
         padding: 0 11px 0 13px;
         text-overflow: ellipsis;
@@ -70,5 +72,19 @@ li {
       }
 
 #pac-input:focus {
-border-color: #4d90fe;
+border: 1 px solid #4d90fe;
+
 }
+
+.close-button {
+  background-position: -14px -92px;
+  height: 14px;
+  width: 14px;
+  float: right;
+  margin: 25px 10px;
+  background: url(//maps.gstatic.com/tactile/omnibox/reveal-entity-icons-20131112.png);
+  background-size: 66px 176px;
+  color: gray;
+  cursor: pointer;
+}
+
