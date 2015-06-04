@@ -52,8 +52,11 @@ function onClickMap(clickedLocation, inName) {
 
 		var closeButton = '<div onclick="closeClickMap()" class="close-button">X</div><div style="clear:both"></div>';
 		$('#controlPanel').hide();
-		$('#contentInfo').fadeIn();
-		$('#contentInfo').html('<div style="float:left"><h2>' + header + '</h2></div>' + closeButton + img);
+		//$('#contentInfo').fadeIn();
+		//$('#contentInfo').html('<div style="float:left"><h2>' + header + '</h2></div>' + closeButton + img);
+		$('#overlaycontent').html('<h2>' + header + '</h2></div>' +  img);
+		toggleOverlay();
+		
 		//infowindow.setPosition(clickedLocation);
 		//infowindow.open(map);
 
@@ -239,95 +242,4 @@ function preZero(d) {
 	}
 	return d;
 }
-function codeLatLng(latlng) {
-    geocoder.geocode({'latLng': latlng}, function(results, status) {
-      if (status == google.maps.GeocoderStatus.OK) {
-        if (results[1]) {
-          console.log('result1', results[1])
-          console.log('results', results);
-          console.log(JSON.stringify(results))
-          /*
-          map.setZoom(11);
-          marker = new google.maps.Marker({
-              position: latlng,
-              map: map
-          });
-          infowindow.setContent(results[1].formatted_address);
-          infowindow.open(map, marker);
-          */
-        } else {
-          alert('No results found');
-        }
-      } else {
-        alert('Geocoder failed due to: ' + status);
-      }
-    });
-    
-    var request = {
-            placeId: 'ChIJN6U_f8uoQEYRUI27VocAdnM'
-          };
-
-          var infowindow = new google.maps.InfoWindow();
-          var service = new google.maps.places.PlacesService(map);
-
-          service.getDetails(request, function(place, status) {
-            /*  
-            if (status == google.maps.places.PlacesServiceStatus.OK) {
-              var marker = new google.maps.Marker({
-                map: map,
-                position: place.geometry.location
-              });
-              google.maps.event.addListener(marker, 'click', function() {
-                infowindow.setContent(place.name);
-                infowindow.open(map, this);
-              });
-            }
-            */
-            console.log('place', place, status, JSON.stringify(place))
-          });
-
-  }
-
-//ChIJxyT3tPhgQEYRso5FeMZoLp4
-/*
-[{"address_components":[{"long_name":"910","short_name":"910","types":["street_number"]},
-                        {"long_name":"Sudbøvegen","short_name":"Sudbøvegen","types":["route"]},
-                        {"long_name":"Flatdal","short_name":"Flatdal","types":["postal_town"]},
-                        {"long_name":"Seljord","short_name":"Seljord","types":["administrative_area_level_2","political"]},
-                        {"long_name":"Telemark","short_name":"Telemark","types":["administrative_area_level_1","political"]},
-                        {"long_name":"Norge","short_name":"NO","types":["country","political"]},
-                        {"long_name":"3841","short_name":"3841","types":["postal_code"]}],"formatted_address":"Sudbøvegen 910, 3841 Flatdal, Norge",
-                        "geometry":{"location":{"A":59.7111537,"F":8.339147300000036},"location_type":"ROOFTOP","viewport":{"za":{"A":59.7098047197085,"j":59.71250268029151},"qa":{"j":8.337798319708554,"A":8.340496280291518}}},
-                        "place_id":"ChIJ5_ZIyfxOP0YRp9C2Syf80OI","types":["street_address"]},
-                        {"address_components":[{"long_name":"Flatdal","short_name":"Flatdal","types":["postal_town"]},
-                                               {"long_name":"Seljord","short_name":"Seljord","types":["administrative_area_level_2","political"]},
-                                               {"long_name":"Telemark","short_name":"Telemark","types":["administrative_area_level_1","political"]},
-                                               {"long_name":"Norge","short_name":"NO","types":["country","political"]},
-                                               {"long_name":"3841","short_name":"3841","types":["postal_code"]}],
-                                               "formatted_address":"3841 Flatdal, Norge","geometry":{"bounds":{"za":{"A":59.5208704,"j":59.795068},
-                                                   "qa":{"j":8.20648779999999,"A":8.714946899999973}},"location":{"A":59.71401290000001,"F":8.35749809999993},
-                                                   "location_type":"APPROXIMATE","viewport":{"za":{"A":59.5208704,"j":59.795068},"qa":{"j":8.20648779999999,"A":8.714946899999973}}},
-                                                   "place_id":"ChIJD2wsVSZSP0YR5IZYnsXV9Yo","types":["postal_town"]},{"address_components":[{"long_name":"3841","short_name":"3841","types":["postal_code"]},
-{"long_name":"Telemark","short_name":"Telemark","types":["administrative_area_level_1","political"]},
-{"long_name":"Norge","short_name":"NO","types":["country","political"]}],"formatted_address":"3841, Norge","geometry":{"bounds":{"za":{"A":59.5208704,"j":59.795068},
-    "qa":{"j":8.20648779999999,"A":8.714946899999973}},"location":{"A":59.71401290000001,"F":8.35749809999993},
-    "location_type":"APPROXIMATE","viewport":{"za":{"A":59.5208704,"j":59.795068},"qa":{"j":8.20648779999999,"A":8.714946899999973}}},
-    "place_id":"ChIJD2wsVSZSP0YRZBNuSBAIlQM","types":["postal_code"]},{"address_components":[{"long_name":"Seljord","short_name":"Seljord","types":
-        ["administrative_area_level_2","political"]},{"long_name":"Telemark","short_name":"Telemark","types":["administrative_area_level_1","political"]},
-{"long_name":"Norge","short_name":"NO","types":["country","political"]}],"formatted_address":"Seljord, Norge",
-"geometry":{"bounds":{"za":{"A":59.35157150000001,"j":59.7950685},"qa":{"j":8.206493000000023,"A":8.91723550000006}},
-    "location":{"A":59.71401290000001,"F":8.35749809999993},"location_type":"APPROXIMATE","viewport":{"za":{"A":59.35157150000001,"j":59.7950685},
-    
-    
-        "qa":{"j":8.206493000000023,"A":8.91723550000006}}},"place_id":"ChIJf4wAjDmrOEYRXV80Iu7PfpU","types":["administrative_area_level_2","political"]},
-      {"address_components":[{"long_name":"Telemark","short_name":"Telemark","types":["administrative_area_level_1","political"]},
-{"long_name":"Norge","short_name":"NO","types":["country","political"]}],"formatted_address":"Telemark, Norge",
-"geometry":{"bounds":{"za":{"A":58.76740489999999,"j":60.1882718},"qa":{"j":7.096287399999937,"A":9.895088100000066}},
-    "location":{"A":59.39139849999999,"F":8.321120999999948},"location_type":"APPROXIMATE","viewport":{"za":{"A":58.7674306,"j":60.1882718},
-        "qa":{"j":7.096287399999937,"A":9.895088100000066}}},"place_id":"ChIJybyAB_-rOEYRkByzKCZ3AQM","types":["administrative_area_level_1","political"]},{"address_components":[{"long_name":"Norge","short_name":"NO","types":["country","political"]}],"formatted_address":"Norge","geometry":{"bounds":{"za":{"A":57.9595703,"j":71.1854762},"qa":{"j":4.500096299999996,"A":31.168268399999988}},"location":{"A":60.47202399999999,"F":8.46894599999996},"location_type":"APPROXIMATE","viewport":{"za":{"A":57.9736345,"j":71.1854762},
-            "qa":{"j":4.614225099999999,"A":31.149789199999987}}},"place_id":"ChIJv-VNj0VoEkYRK9BkuJ07sKE","types":["country","political"]}]
-
-*/
-
-//{"address_components":[{"long_name":"1140","short_name":"1140","types":["street_number"]},{"long_name":"Fylkesvei 211","short_name":"Fv211","types":["route"]},{"long_name":"Eggedal","short_name":"Eggedal","types":["postal_town"]},{"long_name":"Sigdal","short_name":"Sigdal","types":["administrative_area_level_2","political"]},{"long_name":"Buskerud","short_name":"Buskerud","types":["administrative_area_level_1","political"]},{"long_name":"Norge","short_name":"NO","types":["country","political"]},{"long_name":"3359","short_name":"3359","types":["postal_code"]}],"formatted_address":"Fylkesvei 211 1140, 3359 Eggedal, Norge","geometry":{"location":{"A":60.2566374,"F":9.29725570000005},"location_type":"ROOFTOP","viewport":{"za":{"A":60.25528841970849,"j":60.2579863802915},"qa":{"j":9.295906719708455,"A":9.298604680291533}}},"place_id":"ChIJtWj_AtaJQEYRaIXfA6Xp9rQ","types":["street_address"]},{"address_components":[{"long_name":"Flå","short_name":"Flå","types":["administrative_area_level_2","political"]},{"long_name":"Buskerud","short_name":"Buskerud","types":["administrative_area_level_1","political"]},{"long_name":"Norge","short_name":"NO","types":["country","political"]}],"formatted_address":"Flå, Norge","geometry":{"bounds":{"za":{"A":60.296659,"j":60.57192910000001},"qa":{"j":9.099160600000005,"A":9.8467177}},"location":{"A":60.3837212,"F":9.485904800000071},"location_type":"APPROXIMATE","viewport":{"za":{"A":60.296659,"j":60.57192910000001},"qa":{"j":9.099160600000005,"A":9.8467177}}},"place_id":"ChIJtbM7Ub5oQEYR1e-lMfxnUyA","types":["administrative_area_level_2","political"]},{"address_components":[{"long_name":"3539","short_name":"3539","types":["postal_code"]},{"long_name":"Buskerud","short_name":"Buskerud","types":["administrative_area_level_1","political"]},{"long_name":"Norge","short_name":"NO","types":["country","political"]}],"formatted_address":"3539, Norge","geometry":{"bounds":{"za":{"A":60.2966596,"j":60.57193030000001},"qa":{"j":9.09446909999997,"A":9.846716799999967}},"location":{"A":60.3837212,"F":9.485904800000071},"location_type":"APPROXIMATE","viewport":{"za":{"A":60.2966596,"j":60.57193030000001},"qa":{"j":9.09446909999997,"A":9.846716799999967}}},"place_id":"ChIJC7M7Ub5oQEYRjxTIzKS0eQk","types":["postal_code"]},{"address_components":[{"long_name":"Flå","short_name":"Flå","types":["postal_town"]},{"long_name":"Flå","short_name":"Flå","types":["administrative_area_level_2","political"]},{"long_name":"Buskerud","short_name":"Buskerud","types":["administrative_area_level_1","political"]},{"long_name":"Norge","short_name":"NO","types":["country","political"]},{"long_name":"3539","short_name":"3539","types":["postal_code"]}],"formatted_address":"3539 Flå, Norge","geometry":{"bounds":{"za":{"A":60.2966596,"j":60.57193030000001},"qa":{"j":9.09446909999997,"A":9.846716799999967}},"location":{"A":60.3837212,"F":9.485904800000071},"location_type":"APPROXIMATE","viewport":{"za":{"A":60.2966596,"j":60.57193030000001},"qa":{"j":9.09446909999997,"A":9.846716799999967}}},"place_id":"ChIJC7M7Ub5oQEYRYxHSDAYm0W0","types":["postal_town"]},{"address_components":[{"long_name":"Buskerud","short_name":"Buskerud","types":["administrative_area_level_1","political"]},{"long_name":"Norge","short_name":"NO","types":["country","political"]}],"formatted_address":"Buskerud, Norge","geometry":{"bounds":{"za":{"A":59.4078708,"j":61.0917205},"qa":{"j":7.438842300000033,"A":10.619260599999961}},"location":{"A":60.48460249999999,"F":8.69837640000003},"location_type":"APPROXIMATE","viewport":{"za":{"A":59.4078708,"j":61.0917205},"qa":{"j":7.438842300000033,"A":10.619260599999961}}},"place_id":"ChIJe8BoDMeAQEYRcByzKCZ3AQM","types":["administrative_area_level_1","political"]},{"address_components":[{"long_name":"Norge","short_name":"NO","types":["country","political"]}],"formatted_address":"Norge","geometry":{"bounds":{"za":{"A":57.9595703,"j":71.1854762},"qa":{"j":4.500096299999996,"A":31.168268399999988}},"location":{"A":60.47202399999999,"F":8.46894599999996},"location_type":"APPROXIMATE","viewport":{"za":{"A":57.9736345,"j":71.1854762},"qa":{"j":4.614225099999999,"A":31.149789199999987}}},"place_id":"ChIJv-VNj0VoEkYRK9BkuJ07sKE","types":["country","political"]}]
 
