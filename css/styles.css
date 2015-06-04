@@ -52,7 +52,7 @@ li {
         display:none;
 	border-radius: '3px';
 	box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
-    width: 400px;
+    width: 40%;
     height: 90%;
     overflow-x: hidden;
     overflow-y: auto;
@@ -82,9 +82,17 @@ border: 1 px solid #4d90fe;
   width: 14px;
   float: right;
   margin: 25px 10px;
-  background: url(//maps.gstatic.com/tactile/omnibox/reveal-entity-icons-20131112.png);
   background-size: 66px 176px;
   color: gray;
   cursor: pointer;
 }
 
+.chart {
+float:left;
+width:350px;
+margin: 10px;
+}
+
+figcaption {
+font-weight: bold;
+}

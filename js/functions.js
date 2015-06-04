@@ -1,4 +1,4 @@
-function onClickMap(clickedLocation) {
+function onClickMap(clickedLocation, inName) {
   // Create an ElevationService
   var elevator = new google.maps.ElevationService();
   //var infowindow = new google.maps.InfoWindow();
@@ -6,8 +6,8 @@ function onClickMap(clickedLocation) {
   // Retrieve the clicked location and push it on the array
   locations.push(clickedLocation);
  
-// http://www.yr.no/_/websvc/latlon2p.aspx?lat=59.91&lon=10.78&spr=nob
-
+	// http://www.yr.no/_/websvc/latlon2p.aspx?lat=59.91&lon=10.78&spr=nob
+  
   // Create a LocationElevationRequest object using the array's one value
   var positionalRequest = {
     'locations': locations
@@ -19,30 +19,46 @@ function onClickMap(clickedLocation) {
 
       // Retrieve the first result
       if (results[0]) {
-
+ 	console.log('elevation' + Math.round(results[0].elevation));
         // Open an info window indicating the elevation at the clicked position
-	map.setCenter(clickedLocation);
-	var  img = ''; 
+	$.get('php/fetch.php?lat='+ clickedLocation.lat() + '&lon=' +clickedLocation.lng() , function(response) {
+		var loc = $($.parseXML( response )).find('location').first();
+		var distance = loc.attr('d');
+		var translation = loc.find('translation');
+		var path = translation.attr('path');
+		var name = translation.attr('name');
+		map.setCenter(clickedLocation);
+		var header; 
+		if (inName) {
+			header = inName +' (' + Math.round(results[0].elevation) + ' moh)';
+		} else {
+			header = clickedLocation.toString() + ' (' + Math.round(results[0].elevation) + ' moh, ' + distance + ' m fra ' + name + ')';
+		}
+		var  img = ''; 
 
+		img +=  getRawImg('http://www.yr.no' + path + '/avansert_meteogram.png', 'Værvarsel '  + name);
 
-img +=addMetChart("Nysnø siste 20 dager + 10 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=none&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};swewk,cht=col,mth=inst&nocache=0.7853575034532696', -10, 5, 700, 300);
+		//img +=addMetChart("Nysnø siste 20 dager + 10 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=none&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};swewk,cht=col,mth=inst&nocache=0.7853575034532696', -10, 5, 700, 300);
 
-img +=addMetChart("Nedbør og temperatur siste 10 dager + 5 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=desc&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};fsw,cht=stckcol,mth=inst,clr=%233399FF|ds=hgts,da=29,id={pos};qsw,cht=stckcol,grp=1,mth=inst,clr=%23FF9933|ds=hgts,da=29,id={pos};qtt,cht=stckcol,grp=1,mth=inst,clr=red|ds=hgts,da=29,id={pos};tam,cht=line,mth=inst,drwd=3,clr=%23FF9933&nocache=0.2664557103998959', -20, 5, 700, 500);
+		img +=addMetChart("Nedbør og temperatur siste 10 dager + 5 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=desc&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};fsw,cht=stckcol,mth=inst,clr=%233399FF|ds=hgts,da=29,id={pos};qsw,cht=stckcol,grp=1,mth=inst,clr=%23FF9933|ds=hgts,da=29,id={pos};qtt,cht=stckcol,grp=1,mth=inst,clr=red|ds=hgts,da=29,id={pos};tam,cht=line,mth=inst,drwd=3,clr=%23FF9933&nocache=0.2664557103998959', -20, 5, 700, 500);
 
-img +=addSnoLayer('swewk', 'Snø endring siste uke');
-img += addSnoLayer('sd', 'Snødybde');
-img += addSnoLayer('lwc', 'Snøtilstand');
-img += addSnoLayer('sdfsw', 'Nysnødybde');
+		img +=addSnoLayer('swewk', 'Snø endring siste uke');
+		img += addSnoLayer('sd', 'Snødybde');
+		img += addSnoLayer('lwc', 'Snøtilstand');
+		img += addSnoLayer('sdfsw', 'Nysnødybde');
 
 	
-        //infowindow.setContent('The elevation at ' + event.latLng +' <br>is ' + Math.round(results[0].elevation) + ' meters. ' + img);
+		//infowindow.setContent('The elevation at ' + event.latLng +' <br>is ' + Math.round(results[0].elevation) + ' meters. ' + img);
 
-var closeButton = '<div onclick="closeClickMap()" class="close-button">X</div><div style="clear:both"></div>';
-        $('#controlPanel').hide();
-	$('#contentInfo').fadeIn();
-	$('#contentInfo').html('<div style="float:left"><h2>' + clickedLocation +' <br>is ' + Math.round(results[0].elevation) + ' meters.</h2></div>' + closeButton + img);
-        //infowindow.setPosition(clickedLocation);
-        //infowindow.open(map);
+		var closeButton = '<div onclick="closeClickMap()" class="close-button">X</div><div style="clear:both"></div>';
+		$('#controlPanel').hide();
+		$('#contentInfo').fadeIn();
+		$('#contentInfo').html('<div style="float:left"><h2>' + header + '</h2></div>' + closeButton + img);
+		//infowindow.setPosition(clickedLocation);
+		//infowindow.open(map);
+
+	});
+
       } else {
         alert('No results found');
       }
@@ -74,7 +90,7 @@ function addMetChart(name, latLng, url, fromDays, toDays, width, height) {
   url = url.replace(/\{pos}/g, pos);
   url = url.replace(/\{width}/g, width);
   url = url.replace(/\{height}/g, height);
-  return '<h3>' + name + '</h3><img width=100% src="'+ url +'">';
+  return getRawImg(url, name);
 }
 
 
@@ -90,6 +106,15 @@ function toDateString(date) {
 function toDateStringISO(date) {
   return date.getFullYear() + '-' + preZero((date.getMonth() + 1)) + '-' + preZero(date.getDate());
 }
+function getRawImg(url, name) {
+var r = '<figure class="chart">' 
+if (name) {
+  r += '<figcaption>' + name + '</figcaption>';
+}
+r += '<a href="'+ url +'" data-lightbox="'+ url+ '" data-title="' + name+ '"><img src="'+ url+ '" width="100%"></a>'; 
+r += '</figure>';
+return r;
+}
 
 
 function getImg(url, latSw, latNe, name) {
@@ -104,11 +129,11 @@ var height = Math.round(document.getElementById('map-canvas').offsetHeight / 2);
 	var url = url + bbox + '&WIDTH=' +width + '&HEIGHT=' + height;
 	var sw = proj4(epsg32633).forward([ latSw.lng(), latSw.lat() ]);
 	var nw = proj4(epsg32633).forward([ latNe.lng(), latNe.lat() ]);
-	var r = "<h3>" + name + "</h3>";
-	r += '<div class="imagediv">';
+	var r = "<figure class=chart><figcaption>" + name + "</figcaption>";
+	r += '<a data-lightbox=f><div class="imagediv">';
 	r += "<img  src='" + baseImage + "' width=100%>";
 	r += "<img class=layerImg src='" + url + "' width=100%>";
-	r += '</div>';
+	r += '</div></a></figure>';
 	return r;
 }
 

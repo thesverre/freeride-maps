@@ -80,12 +80,12 @@ function initializeMap() {
   controlPanelDiv.id = 'controlPanel';
   var controlPanel = new ControlPanel(controlPanelDiv, map);
 
-  controlPanelDiv.index = 2;
+  controlPanelDiv.index = 3;
   map.controls[google.maps.ControlPosition.LEFT_TOP].push(controlPanelDiv);
 
   var div = document.createElement('div');
   div.id ='contentInfo';
-  div.index = 3;
+  div.index = 2;
   map.controls[google.maps.ControlPosition.LEFT_TOP].push(div);
 
   var norgeskartBounds = new google.maps.LatLngBounds(new google.maps.LatLng(
@@ -138,7 +138,7 @@ google.maps.event.addListener(searchBox, 'places_changed', function() {
 	map.setCenter(places[0].geometry.location);
         map.setZoom(12);
 	setOnclickMarker(places[0].geometry.location);
-	onClickMap(places[0].geometry.location);
+	onClickMap(places[0].geometry.location, places[0].name);
         return;
     }
     // For each place, get the icon, place name, and location.
