@@ -27,7 +27,7 @@ function onClickMap(clickedLocation, inName) {
 		var translation = loc.find('translation');
 		var path = translation.attr('path');
 		var name = translation.attr('name');
-		map.setCenter(clickedLocation);
+		//map.setCenter(clickedLocation);
 		var header; 
 		if (inName) {
 			header = inName +' (' + Math.round(results[0].elevation) + ' moh)';
@@ -54,9 +54,31 @@ function onClickMap(clickedLocation, inName) {
 		$('#controlPanel').hide();
 		//$('#contentInfo').fadeIn();
 		//$('#contentInfo').html('<div style="float:left"><h2>' + header + '</h2></div>' + closeButton + img);
-		$('#overlaycontent').html('<h2>' + header + '</h2></div>' +  img);
+		$('#overlaycontent').html('<h2>' + header + '</h2><div class="gallery">' +  img + '</div>');
 		toggleOverlay();
-		
+	
+		$('.gallery').magnificPopup({'delegate' : 'a', 
+		type:'image',
+		mainClass: 'mfp-with-zoom', // this class is for CSS animation below
+		  gallery:{enabled:true},
+		  zoom: {
+		    enabled: true, // By default it's false, so don't forget to enable it
+
+		    duration: 300, // duration of the effect, in milliseconds
+		    easing: 'ease-in-out', // CSS transition easing function 
+
+		    // The "opener" function should return the element from which popup will be zoomed in
+		    // and to which popup will be scaled down
+		    // By defailt it looks for an image tag:
+		    opener: function(openerElement) {
+		      // openerElement is the element on which popup was initialized, in this case its <a> tag
+		      // you don't need to add "opener" option if this code matches your needs, it's defailt one.
+		      return openerElement.is('img') ? openerElement : openerElement.find('img');
+		    }
+		  }
+
+		});
+
 		//infowindow.setPosition(clickedLocation);
 		//infowindow.open(map);
 
@@ -114,7 +136,7 @@ var r = '<figure class="chart">'
 if (name) {
   r += '<figcaption>' + name + '</figcaption>';
 }
-r += '<a href="'+ url +'" data-lightbox="'+ url+ '" data-title="' + name+ '"><img src="'+ url+ '" width="100%"></a>'; 
+r += '<a href="'+ url +'" data-lightbox="'+ url+ '" data-title="' + name+ '"><img src="'+ url+ '" width="100%"></a>';
 r += '</figure>';
 return r;
 }
