@@ -42,10 +42,10 @@ function onClickMap(clickedLocation, inName) {
 
 		img +=addMetChart("Nedbør og temperatur siste 10 dager + 5 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=desc&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};fsw,cht=stckcol,mth=inst,clr=%233399FF|ds=hgts,da=29,id={pos};qsw,cht=stckcol,grp=1,mth=inst,clr=%23FF9933|ds=hgts,da=29,id={pos};qtt,cht=stckcol,grp=1,mth=inst,clr=red|ds=hgts,da=29,id={pos};tam,cht=line,mth=inst,drwd=3,clr=%23FF9933&nocache=0.2664557103998959', -20, 5, 700, 500);
 
-		img +=addSnoLayer('swewk', 'Snø endring siste uke');
-		img += addSnoLayer('sd', 'Snødybde');
-		img += addSnoLayer('lwc', 'Snøtilstand');
-		img += addSnoLayer('sdfsw', 'Nysnødybde');
+		img +=addSnoLayer(clickedLocation, 'swewk', 'Snø endring siste uke');
+		img += addSnoLayer(clickedLocation, 'sd', 'Snødybde');
+		img += addSnoLayer(clickedLocation, 'lwc', 'Snøtilstand');
+		img += addSnoLayer(clickedLocation, 'sdfsw', 'Nysnødybde');
 
 	
 		//infowindow.setContent('The elevation at ' + event.latLng +' <br>is ' + Math.round(results[0].elevation) + ' meters. ' + img);
@@ -100,9 +100,9 @@ function closeClickMap() {
   marker = null;
 }
 
-function addSnoLayer(layer, name) {
+function addSnoLayer(latLng, layer, name) {
 var date = toDateStringISO(new Date());
-return getImg('http://gridwms.nve.no/WMS_server/wms_server.aspx?time=' + date + '&custRefresh=0.1345073445700109&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&STYLES=&VERSION=1.1.1&LAYERS='+ layer +'&SRS=EPSG:32633&BBOX=', map.getBounds().getSouthWest(), map.getBounds().getNorthEast(), name);
+return getImg('http://gridwms.nve.no/WMS_server/wms_server.aspx?time=' + date + '&custRefresh=0.1345073445700109&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&STYLES=&VERSION=1.1.1&LAYERS='+ layer +'&SRS=EPSG:32633&BBOX=', latLng, name);
 }
 
 function addMetChart(name, latLng, url, fromDays, toDays, width, height) {
@@ -142,18 +142,29 @@ return r;
 }
 
 
-function getImg(url, latSw, latNe, name) {
-var width = Math.round(document.getElementById('map-canvas').offsetWidth / 2);
-var height = Math.round(document.getElementById('map-canvas').offsetHeight / 2);
-	var bbox = getBbox(epsg32633, latSw, latNe);
+function getImg(url, latlng, name) {
+var width = Math.round(document.getElementById('map-canvas').offsetWidth);
+var height = Math.round(document.getElementById('map-canvas').offsetHeight);
+var latlng = map.getCenter();
+var r = proj4(epsg32633).forward([ latlng.lng(), latlng.lat() ]);
+var zoom = map.getZoom();
+var scale = [20000000, 20000000, 6200000, 3000000, 1000000, 500000, 200000, 75000, 
+        25000, 12500, 6250, 3125, 1675]
+if (zoom >= scale.length) {
+ zoom = scale.length -1;
+}
+var diff = scale[zoom];
+console.log(zoom, diff);
+var bbox = (r[0]- diff) + "," + (r[1] - diff) + "," + (r[0] + diff) + "," + (r[1] + diff);
+width = 200;
+height = 200;
+	//var bbox = getBbox(epsg32633, latSw, latNe);
 	// var baseImage =
 	// 'http://openwms.statkart.no/skwms1/wms.topo2?LAYERS=topo2_WMS&TRANSPARENT=TRUE&FORMAT=image/png&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&STYLES=&SRS=EPSG:32633&WIDTH=256&HEIGHT=256&BBOX='
 	// + bbox;
 	var baseImage = 'http://openwms.statkart.no/skwms1/wms.toporaster3?LAYERS=topografiskraster&TRANSPARENT=TRUE&FORMAT=image/png&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&STYLES=&SRS=EPSG:32633&WIDTH=' +width + '&HEIGHT=' + height + '&BBOX='
 			+ bbox;
 	var url = url + bbox + '&WIDTH=' +width + '&HEIGHT=' + height;
-	var sw = proj4(epsg32633).forward([ latSw.lng(), latSw.lat() ]);
-	var nw = proj4(epsg32633).forward([ latNe.lng(), latNe.lat() ]);
 	var r = "<figure class=chart><figcaption>" + name + "</figcaption>";
 	r += '<a data-lightbox=f><div class="imagediv">';
 	r += "<img  src='" + baseImage + "' width=100%>";

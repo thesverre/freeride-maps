@@ -90,6 +90,7 @@ border: 1 px solid #4d90fe;
 .chart {
 float:left;
 width:350px;
+height: 200px;
 margin: 10px;
 }
 
