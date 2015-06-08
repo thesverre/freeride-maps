@@ -86,12 +86,40 @@ border: 1 px solid #4d90fe;
   color: gray;
   cursor: pointer;
 }
+.snocontainer {
+ float:left;
+ width:1000px;
+ 
+}
+.graphcontainer {
+ float:left;
+ width: 800px;
+}
+.graphcontainer .chart{
+	 width: 700px;
+	 height: 300px;
+}
+
 
 .chart {
 float:left;
-width:350px;
-height: 200px;
-margin: 10px;
+width:400px;
+height: 300px;
+ margin: 10px;
+
+}
+.chart .imgcontainter {
+	background:white;
+	box-shadow: 0 10px 6px -6px #777;	
+}
+.chart .description {
+	font-size: 10pt;
+	
+}
+.chart .description a{
+	cursor:pointer;
+	color:white;
+	text-decoration: underline;
 }
 
 figcaption {

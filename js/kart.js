@@ -105,6 +105,16 @@ function initializeMap() {
 google.maps.event.addListener(map, 'click', function(event) {
 setOnclickMarker(event.latLng);
 onClickMap(event.latLng);
+console.log('e', event);
+var m = document.getElementById('map-canvas');
+var w = m.offsetWidth;
+var h = m.offsetHeight;
+var y = (h-50) - event.pixel.y;
+var x = Math.round(w/2) - event.pixel.x;
+x = x * -1;
+y = y * -1;
+
+map.panBy(x,y);
 });
 
 function setOnclickMarker(latLng) {
@@ -135,10 +145,18 @@ google.maps.event.addListener(searchBox, 'places_changed', function() {
       marker.setMap(null);
     }
     if (places.length == 1) {
-	map.setCenter(places[0].geometry.location);
-        map.setZoom(12);
-	setOnclickMarker(places[0].geometry.location);
-	onClickMap(places[0].geometry.location, places[0].name);
+		map.setCenter(places[0].geometry.location);
+	    map.setZoom(12);
+	    var m = document.getElementById('map-canvas');
+	    var h = m.offsetHeight;
+	    var y = (h-50) - Math.round(m.offsetHeight / 2);
+	    y = y * -1;
+
+	    map.panBy(0,y);
+
+	        
+		setOnclickMarker(places[0].geometry.location);
+		onClickMap(places[0].geometry.location, places[0].name);
         return;
     }
     // For each place, get the icon, place name, and location.

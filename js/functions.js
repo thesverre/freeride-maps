@@ -35,18 +35,21 @@ function onClickMap(clickedLocation, inName) {
 			header = clickedLocation.toString() + ' (' + Math.round(results[0].elevation) + ' moh, ' + distance + ' m fra ' + name + ')';
 		}
 		var  img = ''; 
-
-		img +=  getRawImg('http://www.yr.no' + path + '/avansert_meteogram.png', 'Værvarsel '  + name);
+		img +='<div class=graphcontainer>';
+		img +=  getRawImg('http://www.yr.no' + path + '/avansert_meteogram.png', 'Værvarsel '  + name, 'Data er hentet fra yr.no. Se detaljert værvarsel <a target="_blank"  href="http://www.yr.no'+ path+'">her</a>');
 
 		//img +=addMetChart("Nysnø siste 20 dager + 10 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=none&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};swewk,cht=col,mth=inst&nocache=0.7853575034532696', -10, 5, 700, 300);
+		var bbox = getBbox(epsg32633, map.getBounds().getSouthWest(), map.getBounds().getNorthEast());
+		bbox = bbox.replace(/,/g, '|');
+		var senorgeUrl = 'http://www.senorge.no/?p=senorgeny&m=bmNVEGrey;MapLayer_swewk;&l=no&d=1433736000000&e=' + bbox + '&fh=0;2468';
+		img +=addMetChart("Nedbør og temperatur siste 8 dager + 5 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=desc&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};fsw,cht=stckcol,mth=inst,clr=%233399FF|ds=hgts,da=29,id={pos};qsw,cht=stckcol,grp=1,mth=inst,clr=%23FF9933|ds=hgts,da=29,id={pos};qtt,cht=stckcol,grp=1,mth=inst,clr=red|ds=hgts,da=29,id={pos};tam,cht=line,mth=inst,drwd=3,clr=%23FF9933&nocache=0.2664557103998959', -8, 5, 700, 280, 'Data er hentet fra senore.no. Se detaljer <a target="_blank"  href="'+ senorgeUrl+'">her</a>');
 
-		img +=addMetChart("Nedbør og temperatur siste 10 dager + 5 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=desc&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};fsw,cht=stckcol,mth=inst,clr=%233399FF|ds=hgts,da=29,id={pos};qsw,cht=stckcol,grp=1,mth=inst,clr=%23FF9933|ds=hgts,da=29,id={pos};qtt,cht=stckcol,grp=1,mth=inst,clr=red|ds=hgts,da=29,id={pos};tam,cht=line,mth=inst,drwd=3,clr=%23FF9933&nocache=0.2664557103998959', -20, 5, 700, 500);
-
+		img +='</div><div class=snocontainer>';
 		img +=addSnoLayer(clickedLocation, 'swewk', 'Snø endring siste uke');
 		img += addSnoLayer(clickedLocation, 'sd', 'Snødybde');
 		img += addSnoLayer(clickedLocation, 'lwc', 'Snøtilstand');
 		img += addSnoLayer(clickedLocation, 'sdfsw', 'Nysnødybde');
-
+		img +='</div>';
 	
 		//infowindow.setContent('The elevation at ' + event.latLng +' <br>is ' + Math.round(results[0].elevation) + ' meters. ' + img);
 
@@ -55,9 +58,11 @@ function onClickMap(clickedLocation, inName) {
 		//$('#contentInfo').fadeIn();
 		//$('#contentInfo').html('<div style="float:left"><h2>' + header + '</h2></div>' + closeButton + img);
 		$('#overlaycontent').html('<h2>' + header + '</h2><div class="gallery">' +  img + '</div>');
-		toggleOverlay();
-	
-		$('.gallery').magnificPopup({'delegate' : 'a', 
+		if (!$('.overlay').hasClass('open')) {
+			toggleOverlay();
+		}
+	/*
+		$('.chart').magnificPopup({'delegate' : 'a', 
 		type:'image',
 		mainClass: 'mfp-with-zoom', // this class is for CSS animation below
 		  gallery:{enabled:true},
@@ -71,13 +76,14 @@ function onClickMap(clickedLocation, inName) {
 		    // and to which popup will be scaled down
 		    // By defailt it looks for an image tag:
 		    opener: function(openerElement) {
+console.log('d', openerElement)
 		      // openerElement is the element on which popup was initialized, in this case its <a> tag
 		      // you don't need to add "opener" option if this code matches your needs, it's defailt one.
 		      return openerElement.is('img') ? openerElement : openerElement.find('img');
 		    }
 		  }
 
-		});
+		});*/
 
 		//infowindow.setPosition(clickedLocation);
 		//infowindow.open(map);
@@ -102,10 +108,10 @@ function closeClickMap() {
 
 function addSnoLayer(latLng, layer, name) {
 var date = toDateStringISO(new Date());
-return getImg('http://gridwms.nve.no/WMS_server/wms_server.aspx?time=' + date + '&custRefresh=0.1345073445700109&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&STYLES=&VERSION=1.1.1&LAYERS='+ layer +'&SRS=EPSG:32633&BBOX=', latLng, name);
+return getImg(latLng, 'http://gridwms.nve.no/WMS_server/wms_server.aspx?time=' + date + '&custRefresh=0.1345073445700109&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&STYLES=&VERSION=1.1.1&LAYERS='+ layer +'&SRS=EPSG:32633&BBOX=', latLng, name);
 }
 
-function addMetChart(name, latLng, url, fromDays, toDays, width, height) {
+function addMetChart(name, latLng, url, fromDays, toDays, width, height, desc) {
   var p = proj4(epsg32633).forward([ latLng.lng(), latLng.lat() ]);
   var pos = p[0] + ";" + p[1];
   var fromDate = toDateString(addDays(new Date(), fromDays));
@@ -115,7 +121,7 @@ function addMetChart(name, latLng, url, fromDays, toDays, width, height) {
   url = url.replace(/\{pos}/g, pos);
   url = url.replace(/\{width}/g, width);
   url = url.replace(/\{height}/g, height);
-  return getRawImg(url, name);
+  return getRawImg(url, name, desc);
 }
 
 
@@ -131,33 +137,38 @@ function toDateString(date) {
 function toDateStringISO(date) {
   return date.getFullYear() + '-' + preZero((date.getMonth() + 1)) + '-' + preZero(date.getDate());
 }
-function getRawImg(url, name) {
+function getRawImg(url, name, desc) {
 var r = '<figure class="chart">' 
 if (name) {
   r += '<figcaption>' + name + '</figcaption>';
 }
-r += '<a href="'+ url +'" data-lightbox="'+ url+ '" data-title="' + name+ '"><img src="'+ url+ '" width="100%"></a>';
+r += '<div class="imgcontainter">';
+r += '<img src="'+ url+ '" width="100%">';
+r += '</div>';
+if (desc) {
+	  r += '<div class="description">' + desc+ '</div>';
+	}
 r += '</figure>';
 return r;
 }
 
 
-function getImg(url, latlng, name) {
+function getImg(latlng, url, latlng, name) {
 var width = Math.round(document.getElementById('map-canvas').offsetWidth);
 var height = Math.round(document.getElementById('map-canvas').offsetHeight);
-var latlng = map.getCenter();
 var r = proj4(epsg32633).forward([ latlng.lng(), latlng.lat() ]);
 var zoom = map.getZoom();
 var scale = [20000000, 20000000, 6200000, 3000000, 1000000, 500000, 200000, 75000, 
-        25000, 12500, 6250, 3125, 1675]
+        25000, 12500, 6250, 3125, 1675, 900]
 if (zoom >= scale.length) {
  zoom = scale.length -1;
 }
 var diff = scale[zoom];
-console.log(zoom, diff);
-var bbox = (r[0]- diff) + "," + (r[1] - diff) + "," + (r[0] + diff) + "," + (r[1] + diff);
-width = 200;
-height = 200;
+var diffx = Math.round(diff*1.333333);
+var diffy = diff;
+var bbox = (r[0]- diffx) + "," + (r[1] - diffy) + "," + (r[0] + diffx) + "," + (r[1] + diffy);
+width = 400;
+height = 280;
 	//var bbox = getBbox(epsg32633, latSw, latNe);
 	// var baseImage =
 	// 'http://openwms.statkart.no/skwms1/wms.topo2?LAYERS=topo2_WMS&TRANSPARENT=TRUE&FORMAT=image/png&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&STYLES=&SRS=EPSG:32633&WIDTH=256&HEIGHT=256&BBOX='
@@ -166,10 +177,10 @@ height = 200;
 			+ bbox;
 	var url = url + bbox + '&WIDTH=' +width + '&HEIGHT=' + height;
 	var r = "<figure class=chart><figcaption>" + name + "</figcaption>";
-	r += '<a data-lightbox=f><div class="imagediv">';
+	r += '<div class="imgcontainter imagediv">';
 	r += "<img  src='" + baseImage + "' width=100%>";
 	r += "<img class=layerImg src='" + url + "' width=100%>";
-	r += '</div></a></figure>';
+	r += '</div></figure>';
 	return r;
 }
 

@@ -2,7 +2,8 @@
 .overlay {
 	position: fixed;
 	width: 100%;
-	height: 50%;
+	height: 750px;
+	overflow: auto;
 	top: 0;
 	left: 0;
 	background: rgba(153,204,51,0.9);
@@ -66,7 +67,8 @@ html, body {
 }
 
 .overlay-contentpush {
-	background: rgba(56, 4, 4, 1);
+	-background: rgba(56, 4, 4, 1);
+	background: rgba(153,204,51,0.9);
 	visibility: hidden;
 	-webkit-backface-visibility: hidden;
 	backface-visibility: hidden;
@@ -74,6 +76,7 @@ html, body {
 	transform: translateY(-100%);
 	-webkit-transition: -webkit-transform 0.5s, visibility 0s 0.5s;
 	transition: transform 0.5s, visibility 0s 0.5s;
+	box-shadow: 0 10px 6px -6px #777;
 }
 
 .overlay-contentpush.open {
