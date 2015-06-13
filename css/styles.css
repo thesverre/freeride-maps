@@ -77,11 +77,11 @@ border: 1 px solid #4d90fe;
 }
 
 .close-button {
-  background-position: -14px -92px;
+  background-position: -14px -62px;
   height: 14px;
   width: 14px;
   float: right;
-  margin: 25px 10px;
+  margin: 10px 5px;
   background-size: 66px 176px;
   color: gray;
   cursor: pointer;
@@ -124,4 +124,41 @@ height: 300px;
 
 figcaption {
 font-weight: bold;
+}
+
+.geolocation {
+	background: white;
+	margin-right: 12px;
+	cursor: pointer;
+}
+
+.controlpanel {
+	display:none;
+}
+.controlpanelicon {
+	cursor:pointer;
+}
+
+@media only screen and (max-width: 800px) {
+.snocontainer {
+ width:100%;
+ 
+}
+.graphcontainer {
+ width: 100%;
+ }
+.graphcontainer .chart{
+	 width: 90%;
+}
+
+
+.chart {
+float:left;
+width:100%;
+
+}
+h2 {
+	width: 70%;
+}
+	
 }

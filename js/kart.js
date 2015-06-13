@@ -8,11 +8,23 @@ var geocoder;
 var marker;
 
 function initializeMap() {
+  var hash = location.hash;
+  var zoom = 6;
+  var center = new google.maps.LatLng(59.91387, 10.75225);
+  if (hash) {
+	  var a = hash.substring(1).split(',');
+	  console.log(a);
+	  if (a.length == 3) {
+		  zoom = parseInt(a[0]);
+		  center = new google.maps.LatLng(parseFloat(a[1]), parseFloat(a[2]))
+	  }
+	  
+  }
   geocoder = new google.maps.Geocoder();
-  var oslo = new google.maps.LatLng(59.91387, 10.75225);
+  
   var mapOptions = {
-    zoom: 6,
-    center: oslo,
+    zoom: zoom,
+    center: center,
     rotateControl: true,
     scaleControl: true,
     panControl : false,
@@ -76,17 +88,37 @@ function initializeMap() {
   input.index=1;
   map.controls[google.maps.ControlPosition.LEFT_TOP].push(input);
 
+  var controlPanelContainer = document.createElement('div');
   var controlPanelDiv = document.createElement('div');
   controlPanelDiv.id = 'controlPanel';
   var controlPanel = new ControlPanel(controlPanelDiv, map);
-
-  controlPanelDiv.index = 3;
-  map.controls[google.maps.ControlPosition.LEFT_TOP].push(controlPanelDiv);
+  controlPanelContainer.appendChild(controlPanelDiv); 
+  var d = document.createElement('div')
+  d.innerHTML = '<img onclick="showLayer()" style="margin-left: 12px" src ="images/layers_2.png" width="24px">';
+  d.className = 'controlpanelicon';
+  controlPanelContainer.appendChild(d);
+  controlPanelContainer.index = 3;
+  map.controls[google.maps.ControlPosition.LEFT_TOP].push(controlPanelContainer);
 
   var div = document.createElement('div');
   div.id ='contentInfo';
   div.index = 2;
   map.controls[google.maps.ControlPosition.LEFT_TOP].push(div);
+  
+  var div = document.createElement('div');
+  div.className = 'geolocation';
+  div.innerHTML = '<img src="images/geolocation.png" width="24px">';
+  $(div).click(function() {
+	  navigator.geolocation.getCurrentPosition(function(position) {
+		  var pos = new google.maps.LatLng(position.coords.latitude,
+		                                       position.coords.longitude);
+		  map.panTo(pos);
+		  map.setZoom(14);
+		  setOnclickMarker(pos);	  
+	  });
+	  
+  });
+  map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(div);
 
   var norgeskartBounds = new google.maps.LatLngBounds(new google.maps.LatLng(
 			57.5, 3), new google.maps.LatLng(71, 31.5));
@@ -105,7 +137,6 @@ function initializeMap() {
 google.maps.event.addListener(map, 'click', function(event) {
 setOnclickMarker(event.latLng);
 onClickMap(event.latLng);
-console.log('e', event);
 var m = document.getElementById('map-canvas');
 var w = m.offsetWidth;
 var h = m.offsetHeight;
@@ -127,6 +158,9 @@ marker = new google.maps.Marker({
 } else {
 marker.setPosition(latLng);
 }
+google.maps.event.addListener(marker, 'click', function() {
+	onClickMap(marker.getPosition())
+  });
 
 }
 
@@ -134,6 +168,7 @@ var markers = [];
 google.maps.event.addListener(map, 'bounds_changed', function() {
     var bounds = map.getBounds();
     searchBox.setBounds(bounds);
+    location.href = location.pathname + "#" + map.getZoom() + ',' + map.getCenter().toUrlValue();
   });
 google.maps.event.addListener(searchBox, 'places_changed', function() {
     var places = searchBox.getPlaces();
@@ -179,8 +214,6 @@ google.maps.event.addListener(searchBox, 'places_changed', function() {
 	clickable: true,
         position: place.geometry.location
       });
-google.maps.event.addListener(marker, 'click', function() {
-});
 
       markers.push(marker);
 
@@ -191,6 +224,7 @@ google.maps.event.addListener(marker, 'click', function() {
   });
 
 }
+
 
 
 

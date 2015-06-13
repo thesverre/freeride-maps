@@ -190,17 +190,28 @@ function getBbox(epsg, latSw, latNe) {
 	return sw[0] + "," + sw[1] + "," + nw[0] + "," + nw[1];
 }
 
-
+function closeLayer() {
+  $('.controlpanel').hide();
+  $('.controlpanelicon').show();
+}
+function showLayer() {
+	$('.controlpanel').show();
+	$('.controlpanelicon').hide();
+}
 function ControlPanel(controlDiv, map) {
 
   // Set CSS for the control border
   var controlUI = document.createElement('div');
  controlUI.className='controlpanel';
-  controlDiv.appendChild(controlUI);
+ controlDiv.appendChild(controlUI);
 
+  var closeButton = '<div onclick="closeLayer()" class="close-button">X</div>';
+  var c = document.createElement('div');
+  c.innerHTML = closeButton;
+  controlUI.appendChild(c);
   var header = document.createElement('h2');
   header.innerHTML = "Data";
-  controlUI.appendChild(header);
+  //controlUI.appendChild(header);
 
 
   // Set CSS for the control interior
