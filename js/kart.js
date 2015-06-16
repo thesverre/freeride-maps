@@ -148,6 +148,9 @@ y = y * -1;
 map.panBy(x,y);
 });
 
+var closeBttn = $('.overlay-close' );    
+closeBttn.click( toggleOverlay );
+
 function setOnclickMarker(latLng) {
 if (!marker) {
 marker = new google.maps.Marker({
