@@ -1,8 +1,5 @@
 function onClickMap(clickedLocation, inName) {
-  // Create an ElevationService
-  
-	var elevator = new google.maps.ElevationService();
-  //var infowindow = new google.maps.InfoWindow();
+  var elevator = new google.maps.ElevationService();
   var locations = [];
   // Retrieve the clicked location and push it on the array
   locations.push(clickedLocation);
@@ -263,5 +260,29 @@ function preZero(d) {
 		return '0' + d;
 	}
 	return d;
+}
+
+
+function toggleOverlay() {
+    var transEndEventName = 'transitionend';
+    if( $('.overlay').hasClass( 'open' ) ) {
+        $('.overlay').removeClass( 'open' );
+        $('.container').removeClass( 'overlay-open' );
+        $('.overlay').addClass('close' );
+        var onEndTransitionFn = function( ev ) {
+            if( support.transitions ) {
+                if( ev.propertyName !== 'visibility' ) return;
+                this.removeEventListener( transEndEventName, onEndTransitionFn );
+            }
+            $('.overlay').removeClass( 'close' );
+        };
+       
+            overlay.addEventListener( transEndEventName, onEndTransitionFn );
+        
+    }
+    else if( !$('.overlay').hasClass( 'close' ) ) {
+        $('.overlay').addClass( 'open' );
+        $('.container').addClass( 'overlay-open' );
+    }
 }
 
