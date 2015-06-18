@@ -140,12 +140,44 @@ height = 280;
 	var baseImage = 'http://openwms.statkart.no/skwms1/wms.toporaster3?LAYERS=topografiskraster&TRANSPARENT=TRUE&FORMAT=image/png&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&STYLES=&SRS=EPSG:32633&WIDTH=' +width + '&HEIGHT=' + height + '&BBOX='
 			+ bbox;
 	var url = url + bbox + '&WIDTH=' +width + '&HEIGHT=' + height;
-	var r = "<figure class=chart><figcaption>" + name + "</figcaption>";
+	var r = "<figure class=chart onclick='zoomElm(this)' ><figcaption>" + name + "</figcaption>";
 	r += '<div class="imgcontainter imagediv">';
 	r += "<img  src='" + baseImage + "' width=100%>";
 	r += "<img class=layerImg src='" + url + "' width=100%>";
 	r += '</div></figure>';
 	return r;
+}
+
+function zoomElm(o) {
+	var p = $(o);
+	var newNode = o.cloneNode(true);
+	var z = document.getElementById("zoomcontainer");
+	var d = document.createElement('div');
+	d.appendChild(newNode);
+	$(z).empty();
+	z.appendChild(d);
+	var d = $(d);
+	d.addClass('zoom');
+	var offset = p.offset(); 
+	d.offset({ top: offset.top, left: offset.left});
+	//z.attr("style", '');
+	console.log('da', x)
+	var x = Math.round(offset.left * -1) + Math.round(p.width() / 2);
+	x = Math.round(x /2);
+	x = x +5;
+	
+	var y = Math.round(offset.top * -1);
+	y = Math.round(y /2);
+	y = y +5;
+	//var y = Math.round((p.height() / 2) * -1);
+	var css = {"transform": "scale(2,2) translateX("+ x + "px) translateY("+ y + "px)", "transition": "transform 0.5s", 
+			"z-index": 100};
+	console.log('css', css, offset);
+	d.css(css );
+	
+	$(z).show();
+	$('#overlaycontent').addClass('overlaydim');
+	
 }
 
 function getBbox(epsg, latSw, latNe) {
