@@ -5,6 +5,7 @@ function onClickMap(clickedLocation, inName) {
   locations.push(clickedLocation);
  
 	// http://www.yr.no/_/websvc/latlon2p.aspx?lat=59.91&lon=10.78&spr=nob
+  // https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gsradius=10000&gscoord=61.08485672110025%7C8.360595703125
   
   // Create a LocationElevationRequest object using the array's one value
   var positionalRequest = {
@@ -13,11 +14,14 @@ function onClickMap(clickedLocation, inName) {
 
   // Initiate the location request
   elevator.getElevationForLocations(positionalRequest, function(results, status) {
+	var elevation = 'Ukjent';
     if (status == google.maps.ElevationStatus.OK) {
-
+    	if (results[0]) {
+      	  elevation = Math.round(results[0].elevation);
+    	}
+    }
       // Retrieve the first result
-      if (results[0]) {
- 	console.log('elevation' + Math.round(results[0].elevation));
+      
         // Open an info window indicating the elevation at the clicked position
 	$.get('php/fetch.php?lat='+ clickedLocation.lat() + '&lon=' +clickedLocation.lng() , function(response) {
 		var loc = $($.parseXML( response )).find('location').first();
@@ -28,9 +32,9 @@ function onClickMap(clickedLocation, inName) {
 		//map.setCenter(clickedLocation);
 		var header; 
 		if (inName) {
-			header = inName +' (' + Math.round(results[0].elevation) + ' moh)';
+			header = inName +' (' + Math.round(elevation) + ' moh)';
 		} else {
-			header = clickedLocation.toString() + ' (' + Math.round(results[0].elevation) + ' moh, ' + distance + ' m fra ' + name + ')';
+			header = clickedLocation.toString() + ' (' + elevation + ' moh, ' + distance + ' m fra ' + name + ')';
 		}
 		var  img = ''; 
 		img +='<div class=graphcontainer>';
@@ -40,7 +44,7 @@ function onClickMap(clickedLocation, inName) {
 		var bbox = getBbox(epsg32633, map.getBounds().getSouthWest(), map.getBounds().getNorthEast());
 		bbox = bbox.replace(/,/g, '|');
 		var senorgeUrl = 'http://www.senorge.no/?p=senorgeny&m=bmNVEGrey;MapLayer_swewk;&l=no&d=1433736000000&e=' + bbox + '&fh=0;2468';
-		img +=addMetChart("Nedbør og temperatur siste 8 dager + 5 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=desc&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};fsw,cht=stckcol,mth=inst,clr=%233399FF|ds=hgts,da=29,id={pos};qsw,cht=stckcol,grp=1,mth=inst,clr=%23FF9933|ds=hgts,da=29,id={pos};qtt,cht=stckcol,grp=1,mth=inst,clr=red|ds=hgts,da=29,id={pos};tam,cht=line,mth=inst,drwd=3,clr=%23FF9933&nocache=0.2664557103998959', -8, 5, 700, 280, 'Data er hentet fra senore.no. Se detaljer <a target="_blank"  href="'+ senorgeUrl+'">her</a>');
+		img +=addMetChart("Nedbør og temperatur siste 8 dager + 5 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=desc&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};fsw,cht=stckcol,mth=inst,clr=%233399FF|ds=hgts,da=29,id={pos};qsw,cht=stckcol,grp=1,mth=inst,clr=%23FF9933|ds=hgts,da=29,id={pos};qtt,cht=stckcol,grp=1,mth=inst,clr=red|ds=hgts,da=29,id={pos};tam,cht=line,mth=inst,drwd=3,clr=%23FF9933&nocache=0.2664557103998959', -8, 5, 700, 280, 'Data er hentet fra senorge.no. Se detaljer <a target="_blank"  href="'+ senorgeUrl+'">her</a>');
 
 		img +='</div><div class=snocontainer>';
 		img +=addSnoLayer(clickedLocation, 'swewk', 'Snø endring siste uke');
@@ -48,52 +52,14 @@ function onClickMap(clickedLocation, inName) {
 		img += addSnoLayer(clickedLocation, 'lwc', 'Snøtilstand');
 		img += addSnoLayer(clickedLocation, 'sdfsw', 'Nysnødybde');
 		img +='</div>';
-	
-		//infowindow.setContent('The elevation at ' + event.latLng +' <br>is ' + Math.round(results[0].elevation) + ' meters. ' + img);
 
-		var closeButton = '<div onclick="closeClickMap()" class="close-button">X</div><div style="clear:both"></div>';
-		$('#controlPanel').hide();
-		//$('#contentInfo').fadeIn();
-		//$('#contentInfo').html('<div style="float:left"><h2>' + header + '</h2></div>' + closeButton + img);
 		$('#overlaycontent').html('<h2>' + header + '</h2><div class="gallery">' +  img + '</div>');
 		if (!$('.overlay').hasClass('open')) {
 			toggleOverlay();
 		}
-	/*
-		$('.chart').magnificPopup({'delegate' : 'a', 
-		type:'image',
-		mainClass: 'mfp-with-zoom', // this class is for CSS animation below
-		  gallery:{enabled:true},
-		  zoom: {
-		    enabled: true, // By default it's false, so don't forget to enable it
-
-		    duration: 300, // duration of the effect, in milliseconds
-		    easing: 'ease-in-out', // CSS transition easing function 
-
-		    // The "opener" function should return the element from which popup will be zoomed in
-		    // and to which popup will be scaled down
-		    // By defailt it looks for an image tag:
-		    opener: function(openerElement) {
-console.log('d', openerElement)
-		      // openerElement is the element on which popup was initialized, in this case its <a> tag
-		      // you don't need to add "opener" option if this code matches your needs, it's defailt one.
-		      return openerElement.is('img') ? openerElement : openerElement.find('img');
-		    }
-		  }
-
-		});*/
-
-		//infowindow.setPosition(clickedLocation);
-		//infowindow.open(map);
+	
 
 	});
-
-      } else {
-        alert('No results found');
-      }
-    } else {
-      alert('Elevation service failed due to: ' + status);
-    }
   });
 }
 
@@ -156,12 +122,12 @@ var width = Math.round(document.getElementById('map-canvas').offsetWidth);
 var height = Math.round(document.getElementById('map-canvas').offsetHeight);
 var r = proj4(epsg32633).forward([ latlng.lng(), latlng.lat() ]);
 var zoom = map.getZoom();
-var scale = [20000000, 20000000, 6200000, 3000000, 1000000, 500000, 200000, 75000, 
-        25000, 12500, 6250, 3125, 1675, 900]
+var scale = [20000000, 6200000, 3000000, 1000000, 500000, 200000, 75000, 
+        25000, 12500, 6250, 3125, 1675, 900, 450, 225]
 if (zoom >= scale.length) {
  zoom = scale.length -1;
 }
-var diff = scale[zoom];
+var diff = scale[zoom]*4;
 var diffx = Math.round(diff*1.333333);
 var diffy = diff;
 var bbox = (r[0]- diffx) + "," + (r[1] - diffy) + "," + (r[0] + diffx) + "," + (r[1] + diffy);
