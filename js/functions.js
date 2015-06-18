@@ -302,14 +302,13 @@ function toggleOverlay() {
         $('.container').removeClass( 'overlay-open' );
         $('.overlay').addClass('close' );
         var onEndTransitionFn = function( ev ) {
-            if( support.transitions ) {
-                if( ev.propertyName !== 'visibility' ) return;
-                this.removeEventListener( transEndEventName, onEndTransitionFn );
-            }
+            if( ev.propertyName !== 'visibility' ) return;
+            this.removeEventListener( transEndEventName, onEndTransitionFn );
+            
             $('.overlay').removeClass( 'close' );
         };
        
-            overlay.addEventListener( transEndEventName, onEndTransitionFn );
+        document.querySelector('div.overlay').addEventListener( transEndEventName, onEndTransitionFn );
         
     }
     else if( !$('.overlay').hasClass( 'close' ) ) {
