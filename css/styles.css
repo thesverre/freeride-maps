@@ -116,7 +116,7 @@ height: 300px;
 	font-size: 10pt;
 	
 }
-.chart .description a{
+a{
 	cursor:pointer;
 	color:white;
 	text-decoration: underline;
@@ -161,16 +161,6 @@ body {
     font-size: 100%;
     line-height: 1.25;
     font-family: 'Lato', 'Avenir Next', Arial, sans-serif;
-}
-
-a {
-    color: #99cc33;
-    text-decoration: none;
-    outline: none;
-}
-
-a:hover, a:focus {
-    color: #373e18;
 }
 
 .codrops-header {
@@ -338,11 +328,6 @@ section button {
     outline: none;
     z-index: 100;
 }
-.overlaydim {
-	opacity: 0;
-	transform: opacity 0.5s;
-}
-
 
 
 /* Effects */
@@ -391,6 +376,15 @@ html, body {
 
 #zoomcontainer {
 	position:absolute;	
+	top: 0px;
+	left: 0px;
+	color: white;
+}
+
+.zoom-close {
+	opacity: 0.3;
+    transform: translateX(-1000px);
+    transition: all 0.5s;
 }
 
 

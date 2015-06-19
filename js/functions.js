@@ -102,7 +102,7 @@ function toDateStringISO(date) {
   return date.getFullYear() + '-' + preZero((date.getMonth() + 1)) + '-' + preZero(date.getDate());
 }
 function getRawImg(url, name, desc) {
-var r = '<figure class="chart">' 
+var r = '<figure class="chart" onclick="zoomElm(this)">' 
 if (name) {
   r += '<figcaption>' + name + '</figcaption>';
 }
@@ -149,7 +149,12 @@ height = 280;
 }
 
 function zoomElm(o) {
+	if (document.getElementById('map-canvas').offsetWidth < 1810) {
+		return;
+	} 
+	$('#zoomcontainer').show();
 	var p = $(o);
+	document.pp = p;
 	var newNode = o.cloneNode(true);
 	var z = document.getElementById("zoomcontainer");
 	var d = document.createElement('div');
@@ -161,7 +166,7 @@ function zoomElm(o) {
 	var offset = p.offset(); 
 	d.offset({ top: offset.top, left: offset.left});
 	//z.attr("style", '');
-	console.log('da', x)
+	
 	var x = Math.round(offset.left * -1) + Math.round(p.width() / 2);
 	x = Math.round(x /2);
 	x = x +5;
@@ -169,14 +174,25 @@ function zoomElm(o) {
 	var y = Math.round(offset.top * -1);
 	y = Math.round(y /2);
 	y = y +5;
+	if (p.width() > 500) {
+		y = y +85;
+		x = x + 15;
+	}
 	//var y = Math.round((p.height() / 2) * -1);
 	var css = {"transform": "scale(2,2) translateX("+ x + "px) translateY("+ y + "px)", "transition": "transform 0.5s", 
 			"z-index": 100};
 	console.log('css', css, offset);
 	d.css(css );
-	
+	d.find('.chart').removeClass('chart');
 	$(z).show();
+	/*
+	$('#overlaycontent').removeClass('overlayshow');
 	$('#overlaycontent').addClass('overlaydim');
+	$('#overlaycontent').parent().on('transitionend', function() {
+		//document.getElementById('overlaycontent').style.visibility = 'hidden';
+	});*/
+	$('#overlaycontent').addClass('open').fadeOut();
+	
 	
 }
 
@@ -296,6 +312,14 @@ function preZero(d) {
 
 
 function toggleOverlay() {
+	if ($('#overlaycontent').hasClass( 'open' )) {
+		$('.zoom figure').addClass('zoom-close');
+		$('.zoom figure').parent().bind('transitionend', function() {
+			$('#zoomcontainer').hide();
+		});
+		$('#overlaycontent').removeClass('open').fadeIn();
+		return;
+	}
     var transEndEventName = 'transitionend';
     if( $('.overlay').hasClass( 'open' ) ) {
         $('.overlay').removeClass( 'open' );
