@@ -88,7 +88,7 @@ border: 1 px solid #4d90fe;
 }
 .snocontainer {
  float:left;
- width:1000px;
+ width:850px;
  
 }
 .graphcontainer {
@@ -387,7 +387,14 @@ html, body {
     transition: all 0.5s;
 }
 
+.snodesc {
+	font-size: 12px;
+	margin-left: 12px;
+}
 
+.links {
+	 padding-top: 30px; 
+}
 
 @media only screen and (max-width: 800px) {
 .snocontainer {

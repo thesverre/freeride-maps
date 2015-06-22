@@ -23,7 +23,7 @@ function onClickMap(clickedLocation, inName) {
       // Retrieve the first result
       
         // Open an info window indicating the elevation at the clicked position
-	$.get('php/fetch.php?lat='+ clickedLocation.lat() + '&lon=' +clickedLocation.lng() , function(response) {
+	$.get('php/fetch.php?type=yr&lat='+ clickedLocation.lat() + '&lon=' +clickedLocation.lng() , function(response) {
 		var loc = $($.parseXML( response )).find('location').first();
 		var distance = loc.attr('d');
 		var translation = loc.find('translation');
@@ -47,13 +47,36 @@ function onClickMap(clickedLocation, inName) {
 		img +=addMetChart("Nedbør og temperatur siste 8 dager + 5 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=desc&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};fsw,cht=stckcol,mth=inst,clr=%233399FF|ds=hgts,da=29,id={pos};qsw,cht=stckcol,grp=1,mth=inst,clr=%23FF9933|ds=hgts,da=29,id={pos};qtt,cht=stckcol,grp=1,mth=inst,clr=red|ds=hgts,da=29,id={pos};tam,cht=line,mth=inst,drwd=3,clr=%23FF9933&nocache=0.2664557103998959', -8, 5, 700, 280, 'Data er hentet fra senorge.no. Se detaljer <a target="_blank"  href="'+ senorgeUrl+'">her</a>');
 
 		img +='</div><div class=snocontainer>';
-		img +=addSnoLayer(clickedLocation, 'swewk', 'Snø endring siste uke');
+		img +=addSnoLayer(clickedLocation, 'swewk', 'Snø endring');
 		img += addSnoLayer(clickedLocation, 'sd', 'Snødybde');
 		img += addSnoLayer(clickedLocation, 'lwc', 'Snøtilstand');
 		img += addSnoLayer(clickedLocation, 'sdfsw', 'Nysnødybde');
+		img += '<div style="clear:both"><div class="snodesc">*I dag -/+ 3 dager</div>';
 		img +='</div>';
-
-		$('#overlaycontent').html('<h2>' + header + '</h2><div class="gallery">' +  img + '</div>');
+		var html = '<h2>' + header + '</h2><div class="gallery">' +  img + '</div>';
+		
+		var p = proj4(epsg32633).forward([ clickedLocation.lng(), clickedLocation.lat() ]);
+		html +='<div class="links">';
+		html +='Se detaljer:';
+		html +='<br><a target="_blank"  href="http://ut.no/finn/?lat='+ clickedLocation.lat() +'&lon=' + clickedLocation.lng()+'&types=trip&type=geolocation">ut.no</a>';
+		html +='<br><a target="_blank"  href="http://www.yr.no'+ path+'">yr.no</a>';
+		html +='<br><a target="_blank"  href="'+ senorgeUrl+'">senorge.no</a>';
+		html +='<br><a target="_blank"  href="https://www.google.com/maps?ll='+ clickedLocation.lat() +',' + clickedLocation.lng()+'&z=' + map.getZoom() +'">maps.google.com</a>';
+		html +='<br><a target="_blank"  href="http://www.norgeskart.no/#' + (map.getZoom()-2) + '/' + p[0] + '/' + p[1] + '">norgeskart.no</a>';
+		html +='<br><a target="_blank" href="http://www.lookr.com/no#!explore/' + clickedLocation.lat() + ';' + clickedLocation.lng() + '">lookr.com</a>';
+		html +='<br><a target="_blank"  href="http://www.webcams.travel/map/#lat='+ clickedLocation.lat() +'&lng=' + clickedLocation.lng()+'&z=' + map.getZoom() +'&t=n">www.webcams.travel</a>';
+		html +='<br><a target="_blank"  href="http://youtube.github.io/geo-search-tool/search.html?q=&la='+ clickedLocation.lat() +'&lo=' + clickedLocation.lng()+'&lr=10km&tw=any&cl=&sl='+ clickedLocation.lat() +  '%20' + clickedLocation.lng()+ '&eo=false&loo=false&cco=false&zl=11&pbt=2015-06-19T17:46:11Z">youtube.com</a>';
+		html +='<br><a target="_blank"  href="http://www.gramfeed.com/instagram/map#/' + clickedLocation.lat() +',' + clickedLocation.lng() + '/1000/-">instagram.com</a>';
+		
+		
+		html +='<br><br>Lenker:';
+		html +='<br><a target="_blank"  href="http://www.varsom.no">varsom.no</a>';
+		html +='<br><a target="_blank"  href="http://sjogg.no">sjogg.no</a>';
+		html +='<br><a target="_blank"  href="http://randopedia.net">randopedia.no</a>';
+		
+		
+		html += '</div>';
+		$('#overlaycontent').html(html);
 		if (!$('.overlay').hasClass('open')) {
 			toggleOverlay();
 		}
@@ -72,7 +95,28 @@ function closeClickMap() {
 
 function addSnoLayer(latLng, layer, name) {
 var date = toDateStringISO(new Date());
-return getImg(latLng, 'http://gridwms.nve.no/WMS_server/wms_server.aspx?time=' + date + '&custRefresh=0.1345073445700109&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&STYLES=&VERSION=1.1.1&LAYERS='+ layer +'&SRS=EPSG:32633&BBOX=', latLng, name);
+
+var startdate = toDateStringISO(addDays(new Date(), -3));
+var enddate = toDateStringISO(addDays(new Date(), 3));
+
+var p = proj4(epsg32633).forward([ latLng.lng(), latLng.lat() ]);
+var pos = p[0] + ";" + p[1];
+name = name + ' <span id="info_' + layer + '"></span>';
+var result = getImg(latLng, 'http://gridwms.nve.no/WMS_server/wms_server.aspx?time=' + date + '&custRefresh=0.1345073445700109&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&STYLES=&VERSION=1.1.1&LAYERS='+ layer +'&SRS=EPSG:32633&BBOX=', latLng, name);
+$.get('php/fetch.php?type=nve&x=' + p[0] + '&y=' + p[1] + '&layer=' + layer + '&startdate=' + startdate + '&enddate=' + enddate, function(result) {
+	result = $.parseJSON(result);
+	console.log(result);
+	
+	var pre = Math.round(result.MapGridValue[0] + result.MapGridValue[1] + result.MapGridValue[2]);
+	var post = Math.round(result.MapGridValue[4] + result.MapGridValue[5] + result.MapGridValue[6]);
+	if (layer == 'sd' || layer == 'lwc') {
+		pre = Math.round(pre / 3);
+		post = Math.round(post / 3);
+	}
+	$('#info_' + layer).html('('+ result.MapGridValue[3] + ' ' + result.Unit + ', ' + pre + ' ' + result.Unit +' / ' + post + ' ' + result.Unit + ')' );
+});
+
+return result;
 }
 
 function addMetChart(name, latLng, url, fromDays, toDays, width, height, desc) {
@@ -87,6 +131,7 @@ function addMetChart(name, latLng, url, fromDays, toDays, width, height, desc) {
   url = url.replace(/\{height}/g, height);
   return getRawImg(url, name, desc);
 }
+
 
 
 function addDays(date, days) {

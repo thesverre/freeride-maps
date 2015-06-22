@@ -140,7 +140,7 @@ onClickMap(event.latLng);
 var m = document.getElementById('map-canvas');
 var w = m.offsetWidth;
 var h = m.offsetHeight;
-var y = (h-50) - event.pixel.y;
+var y = (h-100) - event.pixel.y;
 var x = Math.round(w/2) - event.pixel.x;
 x = x * -1;
 y = y * -1;
@@ -187,7 +187,7 @@ google.maps.event.addListener(searchBox, 'places_changed', function() {
 	    map.setZoom(12);
 	    var m = document.getElementById('map-canvas');
 	    var h = m.offsetHeight;
-	    var y = (h-50) - Math.round(m.offsetHeight / 2);
+	    var y = (h-100) - Math.round(m.offsetHeight / 2);
 	    y = y * -1;
 
 	    map.panBy(0,y);
