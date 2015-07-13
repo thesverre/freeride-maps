@@ -34,26 +34,31 @@ function onClickMap(clickedLocation, inName) {
 		if (inName) {
 			header = inName +' (' + Math.round(elevation) + ' moh)';
 		} else {
-			header = clickedLocation.toString() + ' (' + elevation + ' moh, ' + distance + ' m fra ' + name + ')';
+			header =  elevation + ' moh, ' + distance + ' m fra ' + name + '<div class="position">' + clickedLocation.toString() + '</div>' ;
 		}
 		var  img = ''; 
-		img +='<div class=graphcontainer>';
-		img +=  getRawImg('http://www.yr.no' + path + '/avansert_meteogram.png', 'Værvarsel '  + name, 'Data er hentet fra yr.no. Se detaljert værvarsel <a target="_blank"  href="http://www.yr.no'+ path+'">her</a>');
+		var large = false;
+		if (large) {
+    		img +='<div class=graphcontainer>';
+    		img +=  getRawImg('http://www.yr.no' + path + '/avansert_meteogram.png', 'Værvarsel '  + name, 'Data er hentet fra yr.no. Se detaljert værvarsel <a target="_blank"  href="http://www.yr.no'+ path+'">her</a>');
+    
+    		//img +=addMetChart("Nysnø siste 20 dager + 10 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=none&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};swewk,cht=col,mth=inst&nocache=0.7853575034532696', -10, 5, 700, 300);
+    		var bbox = getBbox(epsg32633, map.getBounds().getSouthWest(), map.getBounds().getNorthEast());
+    		bbox = bbox.replace(/,/g, '|');
+    		var senorgeUrl = 'http://www.senorge.no/?p=senorgeny&m=bmNVEGrey;MapLayer_swewk;&l=no&d=1433736000000&e=' + bbox + '&fh=0;2468';
+    		img +=addMetChart("Nedbør og temperatur siste 8 dager + 5 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=desc&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};fsw,cht=stckcol,mth=inst,clr=%233399FF|ds=hgts,da=29,id={pos};qsw,cht=stckcol,grp=1,mth=inst,clr=%23FF9933|ds=hgts,da=29,id={pos};qtt,cht=stckcol,grp=1,mth=inst,clr=red|ds=hgts,da=29,id={pos};tam,cht=line,mth=inst,drwd=3,clr=%23FF9933&nocache=0.2664557103998959', -8, 5, 700, 280, 'Data er hentet fra senorge.no. Se detaljer <a target="_blank"  href="'+ senorgeUrl+'">her</a>');
+    
+    		img +='</div><div class=snocontainer>';
+    		img +=addSnoLayer(clickedLocation, 'swewk', 'Snø endring siste uke');
+    		img += addSnoLayer(clickedLocation, 'sd', 'Snødybde');
+    		img += addSnoLayer(clickedLocation, 'lwc', 'Snøtilstand');
+    		img += addSnoLayer(clickedLocation, 'sdfsw', 'Nysnødybde');
+    		img +='</div>';
+    		$('#overlaycontent').html('<h2>' + header + '</h2><div class="gallery">' +  img + '</div>');
+		} else {
+		    $('#overlaycontent').html('<h3>' + header + '</h3>');
+		}
 
-		//img +=addMetChart("Nysnø siste 20 dager + 10 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=none&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};swewk,cht=col,mth=inst&nocache=0.7853575034532696', -10, 5, 700, 300);
-		var bbox = getBbox(epsg32633, map.getBounds().getSouthWest(), map.getBounds().getNorthEast());
-		bbox = bbox.replace(/,/g, '|');
-		var senorgeUrl = 'http://www.senorge.no/?p=senorgeny&m=bmNVEGrey;MapLayer_swewk;&l=no&d=1433736000000&e=' + bbox + '&fh=0;2468';
-		img +=addMetChart("Nedbør og temperatur siste 8 dager + 5 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=desc&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};fsw,cht=stckcol,mth=inst,clr=%233399FF|ds=hgts,da=29,id={pos};qsw,cht=stckcol,grp=1,mth=inst,clr=%23FF9933|ds=hgts,da=29,id={pos};qtt,cht=stckcol,grp=1,mth=inst,clr=red|ds=hgts,da=29,id={pos};tam,cht=line,mth=inst,drwd=3,clr=%23FF9933&nocache=0.2664557103998959', -8, 5, 700, 280, 'Data er hentet fra senorge.no. Se detaljer <a target="_blank"  href="'+ senorgeUrl+'">her</a>');
-
-		img +='</div><div class=snocontainer>';
-		img +=addSnoLayer(clickedLocation, 'swewk', 'Snø endring siste uke');
-		img += addSnoLayer(clickedLocation, 'sd', 'Snødybde');
-		img += addSnoLayer(clickedLocation, 'lwc', 'Snøtilstand');
-		img += addSnoLayer(clickedLocation, 'sdfsw', 'Nysnødybde');
-		img +='</div>';
-
-		$('#overlaycontent').html('<h2>' + header + '</h2><div class="gallery">' +  img + '</div>');
 		if (!$('.overlay').hasClass('open')) {
 			toggleOverlay();
 		}

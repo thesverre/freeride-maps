@@ -134,19 +134,21 @@ function initializeMap() {
 	}
   });
 
-google.maps.event.addListener(map, 'click', function(event) {
-setOnclickMarker(event.latLng);
-onClickMap(event.latLng);
-var m = document.getElementById('map-canvas');
-var w = m.offsetWidth;
-var h = m.offsetHeight;
-var y = (h-50) - event.pixel.y;
-var x = Math.round(w/2) - event.pixel.x;
-x = x * -1;
-y = y * -1;
+    google.maps.event.addListener(map, 'click', function(event) {
+        setOnclickMarker(event.latLng);
+        onClickMap(event.latLng);
+        /*
+        var m = document.getElementById('map-canvas');
+        var w = m.offsetWidth;
+        var h = m.offsetHeight;
+        var y = (h - 50) - event.pixel.y;
+        var x = Math.round(w / 2) - event.pixel.x;
+        x = x * -1;
+        y = y * -1;
 
-map.panBy(x,y);
-});
+        map.panBy(x, y);
+        */
+    });
 
 var closeBttn = $('.overlay-close' );    
 closeBttn.click( toggleOverlay );
