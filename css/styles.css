@@ -22,6 +22,23 @@ li {
 	cursor: pointer;
 }
 
+#pac-input {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-top: 12px;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 400px;
+      }
+
+#pac-input:focus {
+border: 1 px solid #4d90fe;
+
+}
+
 .controlpanel {
 	margin: 12px;
 	background-color: #fff;
@@ -58,6 +75,9 @@ li {
  float:left;
  width:850px;
  
+}
+.smallcontainer {
+	height:110px;
 }
 .graphcontainer {
  float:left;
@@ -132,11 +152,6 @@ body {
 }
 
 
-a {
-    color: #99cc33;
-    text-decoration: none;
-    outline: none;
-}
 
 a:hover, a:focus {
     color: #373e18;
@@ -147,8 +162,8 @@ a:hover, a:focus {
 .overlay {
     position: fixed;
     width: 100%;
-    height: 100px;
-    overflow: auto;
+    height: 112px;
+    overflow: none;
     top: 0;
     left: 0;
     background: rgba(153,204,51,0.9);
@@ -157,23 +172,23 @@ a:hover, a:focus {
 }
 
 @keyframes expanded {
-    0%   {height: 100px;}
-    100% {height: 750px;}
+    0%   {height: 112px;}
+    100% {height: 770px;}
 }
 
 .overlay-expanded {
-	height: 750px;
+	height: 770px;
 	animation-name: expanded;
     animation-duration: 0.5s;
 }
 
 @keyframes collapse {
-    0%   {height: 750px;}
-    100% {height: 100px;}
+    0%   {height: 770px;}
+    100% {height: 112px;}
 }
 
 .overlay-collapse {
-    height: 100px;
+    height: 112px;
     animation-name: collapse;
     animation-duration: 0.5s;
 }
@@ -203,8 +218,9 @@ a:hover, a:focus {
 	width: 60px;
     height: 30px;
     position: absolute;
-    left: 100px;
-    top: 60px;
+    left: 50%;
+    margin-left: -30px;
+    top: 80px;
     overflow: hidden;
     border: 1px solid transparent;
     box-sizing: border-box;
@@ -219,8 +235,9 @@ a:hover, a:focus {
     width: 60px;
     height: 30px;
     position: absolute;
-    left: 100px;
-    top: 60px;
+    left: 50%;
+    margin-left: -30px;
+    top: 80px;
     overflow: hidden;
     border: 1px solid transparent;
     box-sizing: border-box;
@@ -289,13 +306,14 @@ html, body {
 }
 
 .smallsnocontainer {
-	float: left;
+  float: left;
   margin-top: 10px;
   margin-left: 20px;
   background-color: white;
   color: black;
   padding: 10px;
   opacity: 0.5;
+  font-size: 12px;
 }
 
 h3 {
@@ -303,8 +321,23 @@ h3 {
     margin-left: 10px;
 }
 
+@media only screen and (max-height: 800px) {
+	.overlay-expanded {
+	   height: 100%;
+	   overflow: auto !important;
+	}
+}
 
+@media only screen and (max-width: 1800px) {
+	.overlay-expanded {
+        overflow: auto !important;
+	}
+}
 @media only screen and (max-width: 800px) {
+.overlay-expanded {
+	overflow: auto !important;
+	height: 100%;
+}
 .snocontainer {
  width:100%;
  

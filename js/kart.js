@@ -32,7 +32,7 @@ function initializeMap() {
     mapTypeControl: true,
     tilt: 45,
     mapTypeControlOptions: {
-      mapTypeIds: [google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.HYBRID, 'statkart_topo2', 'statkart_raster', 'eniro_aerial', 'mix'],
+      mapTypeIds: ['mix', google.maps.MapTypeId.TERRAIN, 'statkart_topo2', 'statkart_raster', 'ut', 'eniro_aerial', google.maps.MapTypeId.HYBRID],
       style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR
     }
   };
@@ -62,7 +62,9 @@ function initializeMap() {
 		return 'http://map01.eniro.no/geowebcache/service/tms1.0.0/aerial/' + zoom + '/' + coord.x + '/' + y + '.jpeg';
       } else if (type == 'google') {
     	return 'http://mt0.google.com/vt/v=w2p.106&hl=en&x=' + coord.x+ '&y=' + coord.y + '&z=' + zoom;
-      } 
+      } else if (type == 'ut') {
+          return 'https://b-kartcache.nrk.no/tiles/ut_topo_light/' + zoom + '/' + coord.x + '/' + coord.y + '.jpg';
+      }
     },
     tileSize: new google.maps.Size(256, 256), 
     opacity :1,
@@ -77,6 +79,7 @@ function initializeMap() {
   map.mapTypes.set('statkart_topo2', createMapType('sk', 'topo2', 'Statkart topograkrafisk'));
   map.mapTypes.set('statkart_raster', createMapType('sk', 'toporaster3', 'Statkart Raster'));
   map.mapTypes.set('eniro_aerial', createMapType('eniro', 'aearial', 'Eniro Flyfoto'));
+  map.mapTypes.set('ut', createMapType('ut', 'ut', 'Ut.no'));
 
 
   var input = /** @type {HTMLInputElement} */(
@@ -159,11 +162,13 @@ moreBttn.click( function() {
        $(this).removeClass('overlay-less').addClass('overlay-more');
        $('.overlay').removeClass('overlay-expanded');
        $('.overlay').addClass('overlay-collapse');
-       //$('.largecontainer').hide();
+       $('.largecontainer').fadeOut();
     } else {
         $(this).addClass('overlay-less').removeClass('overlay-more');
         $('.overlay').removeClass('overlay-collapse').addClass('overlay-expanded');
-        $('.largecontainer').show();
+        var data = $('.largecontainer').data('data');
+        var html = addLargeContainer(data[0],data[1], data[2]);
+        $('.largecontainer').html(html).fadeIn();
        
     }
 } );
