@@ -99,7 +99,7 @@ function initializeMap() {
   controlPanelContainer.appendChild(d);
   controlPanelContainer.index = 3;
   map.controls[google.maps.ControlPosition.LEFT_TOP].push(controlPanelContainer);
-
+  
   var div = document.createElement('div');
   div.id ='contentInfo';
   div.index = 2;
@@ -150,6 +150,17 @@ map.panBy(x,y);
 
 var closeBttn = $('.overlay-close' );    
 closeBttn.click( toggleOverlay );
+var loaded = false;
+google.maps.event.addListener(map, 'tilesloaded', function(event) {
+	if (!loaded) {
+		if (document.getElementById('map-canvas').offsetWidth > 1200) {
+			showLayer();
+			activateLayer('snodybde');
+		}
+		loaded = true;
+	}
+});
+
 
 function setOnclickMarker(latLng) {
 if (!marker) {
