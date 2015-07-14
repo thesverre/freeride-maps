@@ -56,7 +56,7 @@ li {
 }
 .snocontainer {
  float:left;
- width:1000px;
+ width:850px;
  
 }
 .graphcontainer {
@@ -84,7 +84,7 @@ height: 300px;
 	font-size: 10pt;
 	
 }
-.chart .description a{
+a{
 	cursor:pointer;
 	color:white;
 	text-decoration: underline;
@@ -131,6 +131,7 @@ body {
     font-family: 'Lato', 'Avenir Next', Arial, sans-serif;
 }
 
+
 a {
     color: #99cc33;
     text-decoration: none;
@@ -142,36 +143,6 @@ a:hover, a:focus {
 }
 
 
-.related > a {
-    border: 1px solid #99cc33;
-    display: inline-block;
-    text-align: center;
-    margin: 20px 10px;
-    padding: 25px;
-    color: #99cc33;
-    opacity: 0.8;
-    -webkit-transition: color 0.3s, border-color 0.3s;
-    transition: color 0.3s, border-color 0.3s;
-    -webkit-backface-visibility: hidden;
-}
-
-.related a:hover {
-    border-color: #82b222;
-    color: #82b222;
-}
-
-.related a img {
-    max-width: 100%;
-}
-
-.related a h3 {
-    margin: 0;
-    padding: 0.5em 0 0.3em;
-    max-width: 300px;
-    text-align: left;
-    font-size: 65%;
-    font-weight: 400;
-}
 /* Overlay style */
 .overlay {
     position: fixed;
@@ -183,6 +154,28 @@ a:hover, a:focus {
     background: rgba(153,204,51,0.9);
     color: white;
     
+}
+
+@keyframes expanded {
+    0%   {height: 100px;}
+    100% {height: 750px;}
+}
+
+.overlay-expanded {
+	height: 750px;
+	animation-name: expanded;
+    animation-duration: 0.5s;
+}
+
+@keyframes collapse {
+    0%   {height: 750px;}
+    100% {height: 100px;}
+}
+
+.overlay-collapse {
+    height: 100px;
+    animation-name: collapse;
+    animation-duration: 0.5s;
 }
 
 /* Overlay closing cross */
@@ -198,8 +191,47 @@ a:hover, a:focus {
     color: transparent;
     outline: none;
     z-index: 100;
+    border-radius: 5px;
 }
 
+.overlay-more:hover, .overlay-close:hover, .overlay-less:hover {
+	background-color: rgba(163,224,61,0.9);
+	transition: background-color 0.5s;
+	
+}
+.overlay-less{
+	width: 60px;
+    height: 30px;
+    position: absolute;
+    left: 100px;
+    top: 60px;
+    overflow: hidden;
+    border: 1px solid transparent;
+    box-sizing: border-box;
+    border-radius: 5px;
+    background: url(../images/arrow-up.png) no-repeat center center;
+    text-indent: 200%;
+    color: transparent;
+    outline: none;
+    z-index: 100;
+}
+.overlay-more {
+    width: 60px;
+    height: 30px;
+    position: absolute;
+    left: 100px;
+    top: 60px;
+    overflow: hidden;
+    border: 1px solid transparent;
+    box-sizing: border-box;
+    border-radius: 5px;
+    background: url(../images/arrow-down.png) no-repeat center center;
+    text-indent: 200%;
+    color: transparent;
+    outline: none;
+    z-index: 100;
+    
+}
 
 
 /* Effects */
@@ -233,6 +265,43 @@ html, body {
 	font-size: 8pt;
 }
 
+#zoomcontainer {
+	position:absolute;	
+	top: 0px;
+	left: 0px;
+	color: white;
+}
+
+.zoom-close {
+	opacity: 0.3;
+    transform: translateX(-1000px);
+    transition: all 0.5s;
+}
+
+
+.snodesc {
+	font-size: 12px;
+	margin-left: 12px;
+}
+
+.links {
+	 padding-top: 30px; 
+}
+
+.smallsnocontainer {
+	float: left;
+  margin-top: 10px;
+  margin-left: 20px;
+  background-color: white;
+  color: black;
+  padding: 10px;
+  opacity: 0.5;
+}
+
+h3 {
+    margin-top: 10px;
+    margin-left: 10px;
+}
 
 
 @media only screen and (max-width: 800px) {

@@ -134,24 +134,39 @@ function initializeMap() {
 	}
   });
 
-    google.maps.event.addListener(map, 'click', function(event) {
+
+google.maps.event.addListener(map, 'click', function(event) {
         setOnclickMarker(event.latLng);
         onClickMap(event.latLng);
-        /*
         var m = document.getElementById('map-canvas');
         var w = m.offsetWidth;
         var h = m.offsetHeight;
-        var y = (h - 50) - event.pixel.y;
+        var y = (h - 100) - event.pixel.y;
         var x = Math.round(w / 2) - event.pixel.x;
         x = x * -1;
         y = y * -1;
-
-        map.panBy(x, y);
-        */
+    
+        //map.panBy(x, y);
     });
+
 
 var closeBttn = $('.overlay-close' );    
 closeBttn.click( toggleOverlay );
+
+var moreBttn = $('.overlay-more' );    
+moreBttn.click( function() {
+    if ($('.overlay').hasClass('overlay-expanded')) {
+       $(this).removeClass('overlay-less').addClass('overlay-more');
+       $('.overlay').removeClass('overlay-expanded');
+       $('.overlay').addClass('overlay-collapse');
+       //$('.largecontainer').hide();
+    } else {
+        $(this).addClass('overlay-less').removeClass('overlay-more');
+        $('.overlay').removeClass('overlay-collapse').addClass('overlay-expanded');
+        $('.largecontainer').show();
+       
+    }
+} );
 
 function setOnclickMarker(latLng) {
 if (!marker) {
@@ -189,7 +204,7 @@ google.maps.event.addListener(searchBox, 'places_changed', function() {
 	    map.setZoom(12);
 	    var m = document.getElementById('map-canvas');
 	    var h = m.offsetHeight;
-	    var y = (h-50) - Math.round(m.offsetHeight / 2);
+	    var y = (h-100) - Math.round(m.offsetHeight / 2);
 	    y = y * -1;
 
 	    map.panBy(0,y);

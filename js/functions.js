@@ -23,7 +23,7 @@ function onClickMap(clickedLocation, inName) {
       // Retrieve the first result
       
         // Open an info window indicating the elevation at the clicked position
-	$.get('php/fetch.php?lat='+ clickedLocation.lat() + '&lon=' +clickedLocation.lng() , function(response) {
+	$.get('php/fetch.php?type=yr&lat='+ clickedLocation.lat() + '&lon=' +clickedLocation.lng() , function(response) {
 		var loc = $($.parseXML( response )).find('location').first();
 		var distance = loc.attr('d');
 		var translation = loc.find('translation');
@@ -36,29 +36,52 @@ function onClickMap(clickedLocation, inName) {
 		} else {
 			header =  elevation + ' moh, ' + distance + ' m fra ' + name + '<div class="position">' + clickedLocation.toString() + '</div>' ;
 		}
-		var  img = ''; 
-		var large = false;
-		if (large) {
-    		img +='<div class=graphcontainer>';
-    		img +=  getRawImg('http://www.yr.no' + path + '/avansert_meteogram.png', 'Værvarsel '  + name, 'Data er hentet fra yr.no. Se detaljert værvarsel <a target="_blank"  href="http://www.yr.no'+ path+'">her</a>');
-    
-    		//img +=addMetChart("Nysnø siste 20 dager + 10 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=none&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};swewk,cht=col,mth=inst&nocache=0.7853575034532696', -10, 5, 700, 300);
-    		var bbox = getBbox(epsg32633, map.getBounds().getSouthWest(), map.getBounds().getNorthEast());
-    		bbox = bbox.replace(/,/g, '|');
-    		var senorgeUrl = 'http://www.senorge.no/?p=senorgeny&m=bmNVEGrey;MapLayer_swewk;&l=no&d=1433736000000&e=' + bbox + '&fh=0;2468';
-    		img +=addMetChart("Nedbør og temperatur siste 8 dager + 5 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=desc&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};fsw,cht=stckcol,mth=inst,clr=%233399FF|ds=hgts,da=29,id={pos};qsw,cht=stckcol,grp=1,mth=inst,clr=%23FF9933|ds=hgts,da=29,id={pos};qtt,cht=stckcol,grp=1,mth=inst,clr=red|ds=hgts,da=29,id={pos};tam,cht=line,mth=inst,drwd=3,clr=%23FF9933&nocache=0.2664557103998959', -8, 5, 700, 280, 'Data er hentet fra senorge.no. Se detaljer <a target="_blank"  href="'+ senorgeUrl+'">her</a>');
-    
-    		img +='</div><div class=snocontainer>';
-    		img +=addSnoLayer(clickedLocation, 'swewk', 'Snø endring siste uke');
-    		img += addSnoLayer(clickedLocation, 'sd', 'Snødybde');
-    		img += addSnoLayer(clickedLocation, 'lwc', 'Snøtilstand');
-    		img += addSnoLayer(clickedLocation, 'sdfsw', 'Nysnødybde');
-    		img +='</div>';
-    		$('#overlaycontent').html('<h2>' + header + '</h2><div class="gallery">' +  img + '</div>');
-		} else {
-		    $('#overlaycontent').html('<h3>' + header + '</h3>');
-		}
+		var  img = '';
+		
+		img +='<div class=graphcontainer>';
+		img +=  getRawImg('http://www.yr.no' + path + '/avansert_meteogram.png', 'Værvarsel '  + name, 'Data er hentet fra yr.no. Se detaljert værvarsel <a target="_blank"  href="http://www.yr.no'+ path+'">her</a>');
 
+		//img +=addMetChart("Nysnø siste 20 dager + 10 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=none&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};swewk,cht=col,mth=inst&nocache=0.7853575034532696', -10, 5, 700, 300);
+		var bbox = getBbox(epsg32633, map.getBounds().getSouthWest(), map.getBounds().getNorthEast());
+		bbox = bbox.replace(/,/g, '|');
+		var senorgeUrl = 'http://www.senorge.no/?p=senorgeny&m=bmNVEGrey;MapLayer_swewk;&l=no&d=1433736000000&e=' + bbox + '&fh=0;2468';
+		img +=addMetChart("Nedbør og temperatur siste 8 dager + 5 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=desc&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};fsw,cht=stckcol,mth=inst,clr=%233399FF|ds=hgts,da=29,id={pos};qsw,cht=stckcol,grp=1,mth=inst,clr=%23FF9933|ds=hgts,da=29,id={pos};qtt,cht=stckcol,grp=1,mth=inst,clr=red|ds=hgts,da=29,id={pos};tam,cht=line,mth=inst,drwd=3,clr=%23FF9933&nocache=0.2664557103998959', -8, 5, 700, 280, 'Data er hentet fra senorge.no. Se detaljer <a target="_blank"  href="'+ senorgeUrl+'">her</a>');
+
+		img +='</div><div class=snocontainer>';
+		img +=addSnoLayer(clickedLocation, 'swewk', 'Snø endring');
+		img += addSnoLayer(clickedLocation, 'sd', 'Snødybde');
+		img += addSnoLayer(clickedLocation, 'lwc', 'Snøtilstand');
+		img += addSnoLayer(clickedLocation, 'sdfsw', 'Nysnødybde');
+		img += '<div style="clear:both"><div class="snodesc">*I dag -/+ 3 dager</div>';
+		img +='</div>';
+		var html = '<div class="gallery">' +  img + '</div>';
+		
+		var p = proj4(epsg32633).forward([ clickedLocation.lng(), clickedLocation.lat() ]);
+		html +='<div class="links">';
+		html +='Se detaljer:';
+		html +='<br><a target="_blank"  href="http://ut.no/finn/?lat='+ clickedLocation.lat() +'&lon=' + clickedLocation.lng()+'&types=trip&type=geolocation">ut.no</a>';
+		html +='<br><a target="_blank"  href="http://www.yr.no'+ path+'">yr.no</a>';
+		html +='<br><a target="_blank"  href="'+ senorgeUrl+'">senorge.no</a>';
+		html +='<br><a target="_blank"  href="https://www.google.com/maps?ll='+ clickedLocation.lat() +',' + clickedLocation.lng()+'&z=' + map.getZoom() +'">maps.google.com</a>';
+		html +='<br><a target="_blank"  href="http://www.norgeskart.no/#' + (map.getZoom()-2) + '/' + p[0] + '/' + p[1] + '">norgeskart.no</a>';
+		html +='<br><a target="_blank" href="http://www.lookr.com/no#!explore/' + clickedLocation.lat() + ';' + clickedLocation.lng() + '">lookr.com</a>';
+		html +='<br><a target="_blank"  href="http://www.webcams.travel/map/#lat='+ clickedLocation.lat() +'&lng=' + clickedLocation.lng()+'&z=' + map.getZoom() +'&t=n">www.webcams.travel</a>';
+		html +='<br><a target="_blank"  href="http://youtube.github.io/geo-search-tool/search.html?q=&la='+ clickedLocation.lat() +'&lo=' + clickedLocation.lng()+'&lr=10km&tw=any&cl=&sl='+ clickedLocation.lat() +  '%20' + clickedLocation.lng()+ '&eo=false&loo=false&cco=false&zl=11&pbt=2015-06-19T17:46:11Z">youtube.com</a>';
+		html +='<br><a target="_blank"  href="http://www.gramfeed.com/instagram/map#/' + clickedLocation.lat() +',' + clickedLocation.lng() + '/1000/-">instagram.com</a>';
+		
+		
+		html +='<br><br>Lenker:';
+		html +='<br><a target="_blank"  href="http://www.varsom.no">varsom.no</a>';
+		html +='<br><a target="_blank"  href="http://sjogg.no">sjogg.no</a>';
+		html +='<br><a target="_blank"  href="http://randopedia.net">randopedia.no</a>';
+		
+		
+		html += '</div>';
+		//$('#overlaycontent').html(html);
+        var minihtml = '';
+        minihtml = '<div class="smallcontainer"><div style="float:left"><h3>' + header + '</h3></div>' + addSmallSnoInfo(clickedLocation) + '</div>';
+        var display = $('.overlay').hasClass('overlay-expanded') ? 'block' : 'none';
+        $('#overlaycontent').html(minihtml + '<div style="clear:both;display:'+ display + '" class="largecontainer">' + html +'</div>');        
 		if (!$('.overlay').hasClass('open')) {
 			toggleOverlay();
 		}
@@ -76,8 +99,63 @@ function closeClickMap() {
 }
 
 function addSnoLayer(latLng, layer, name) {
-var date = toDateStringISO(new Date());
-return getImg(latLng, 'http://gridwms.nve.no/WMS_server/wms_server.aspx?time=' + date + '&custRefresh=0.1345073445700109&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&STYLES=&VERSION=1.1.1&LAYERS='+ layer +'&SRS=EPSG:32633&BBOX=', latLng, name);
+    var date = toDateStringISO(new Date());
+    
+    var startdate = toDateStringISO(addDays(new Date(), -3));
+    var enddate = toDateStringISO(addDays(new Date(), 3));
+    
+    var p = proj4(epsg32633).forward([ latLng.lng(), latLng.lat() ]);
+    var pos = p[0] + ";" + p[1];
+    name = name + ' <span id="info_' + layer + '"></span>' ;
+    var url = 'php/fetch.php?type=nve&x=' + p[0] + '&y=' + p[1] + '&layer=' + layer + '&startdate=' + startdate + '&enddate=' + enddate;
+    var result = getImg(latLng, 'http://gridwms.nve.no/WMS_server/wms_server.aspx?time=' + date + '&custRefresh=0.1345073445700109&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&STYLES=&VERSION=1.1.1&LAYERS='+ layer +'&SRS=EPSG:32633&BBOX=', latLng, name);
+    $.get(url, function(result) {
+        result = $.parseJSON(result);
+        
+        var pre = Math.round(result.MapGridValue[0] + result.MapGridValue[1] + result.MapGridValue[2]);
+        var post = Math.round(result.MapGridValue[4] + result.MapGridValue[5] + result.MapGridValue[6]);
+        if (layer == 'sd' || layer == 'lwc') {
+            pre = Math.round(pre / 3);
+            post = Math.round(post / 3);
+        }
+        $('#info_' + layer).html('('+ result.MapGridValue[3] + ' ' + result.Unit + ', ' + pre + ' ' + result.Unit +' / ' + post + ' ' + result.Unit + ')' );
+    });
+    return result;
+}
+
+function addSmallSnoInfo(latLng) {
+    var date = toDateStringISO(new Date());
+
+    var startdate = toDateStringISO(addDays(new Date(), -3));
+    var enddate = toDateStringISO(addDays(new Date(), 3));
+
+    var p = proj4(epsg32633).forward([ latLng.lng(), latLng.lat() ]);
+    var pos = p[0] + ";" + p[1];
+    var url = 'php/fetch.php?type=nve&x=' + p[0] + '&y=' + p[1] +  '&startdate=' + startdate + '&enddate=' + enddate+ '&layer=';
+    var html = '';
+    $.get(url + 'sd', function(result) {
+        result = $.parseJSON(result);
+        html +='Snødybde: ' + result.MapGridValue[3] + ' ' + result.Unit;
+        $.get(url + 'lwc', function(result) {
+            result = $.parseJSON(result);
+            var type = '';
+            if (result.MapGridValue[3] < 30) {
+                type = 'Pudder '; 
+            } else if (result.MapGridValue[3] > 60) {
+                type = 'Våt ';
+            }
+            html += ' (' + type  + result.MapGridValue[3] + ' ' + result.Unit  + ')';
+            $.get(url + 'sdfsw', function(result) {
+                result = $.parseJSON(result);
+                var pre = Math.round(result.MapGridValue[0] + result.MapGridValue[1] + result.MapGridValue[2]);
+                var post = Math.round(result.MapGridValue[3] + result.MapGridValue[4] + result.MapGridValue[5] + result.MapGridValue[6]);
+                html += '<br>Nysnø forrige 3 dager: ' +   pre + ' ' + result.Unit;
+                html += '<br>Nysnø idag og neste 3 dager: ' +   post + ' ' + result.Unit;
+                $('.smallsnocontainer').html(html).fadeIn();
+            });
+        });
+    });
+    return '<div class="smallsnocontainer" style="display:none" ></div>';
 }
 
 function addMetChart(name, latLng, url, fromDays, toDays, width, height, desc) {
@@ -94,6 +172,7 @@ function addMetChart(name, latLng, url, fromDays, toDays, width, height, desc) {
 }
 
 
+
 function addDays(date, days) {
     var result = new Date(date);
     result.setDate(result.getDate() + days);
@@ -107,7 +186,7 @@ function toDateStringISO(date) {
   return date.getFullYear() + '-' + preZero((date.getMonth() + 1)) + '-' + preZero(date.getDate());
 }
 function getRawImg(url, name, desc) {
-var r = '<figure class="chart">' 
+var r = '<figure class="chart" onclick="zoomElm(this)">' 
 if (name) {
   r += '<figcaption>' + name + '</figcaption>';
 }
@@ -145,12 +224,60 @@ height = 280;
 	var baseImage = 'http://openwms.statkart.no/skwms1/wms.toporaster3?LAYERS=topografiskraster&TRANSPARENT=TRUE&FORMAT=image/png&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&STYLES=&SRS=EPSG:32633&WIDTH=' +width + '&HEIGHT=' + height + '&BBOX='
 			+ bbox;
 	var url = url + bbox + '&WIDTH=' +width + '&HEIGHT=' + height;
-	var r = "<figure class=chart><figcaption>" + name + "</figcaption>";
+	var r = "<figure class=chart onclick='zoomElm(this)' ><figcaption>" + name + "</figcaption>";
 	r += '<div class="imgcontainter imagediv">';
 	r += "<img  src='" + baseImage + "' width=100%>";
 	r += "<img class=layerImg src='" + url + "' width=100%>";
 	r += '</div></figure>';
 	return r;
+}
+
+function zoomElm(o) {
+	if (document.getElementById('map-canvas').offsetWidth < 1810) {
+		return;
+	} 
+	$('#zoomcontainer').show();
+	var p = $(o);
+	document.pp = p;
+	var newNode = o.cloneNode(true);
+	var z = document.getElementById("zoomcontainer");
+	var d = document.createElement('div');
+	d.appendChild(newNode);
+	$(z).empty();
+	z.appendChild(d);
+	var d = $(d);
+	d.addClass('zoom');
+	var offset = p.offset(); 
+	d.offset({ top: offset.top, left: offset.left});
+	//z.attr("style", '');
+	
+	var x = Math.round(offset.left * -1) + Math.round(p.width() / 2);
+	x = Math.round(x /2);
+	x = x +5;
+	
+	var y = Math.round(offset.top * -1);
+	y = Math.round(y /2);
+	y = y +5;
+	if (p.width() > 500) {
+		y = y +85;
+		x = x + 15;
+	}
+	//var y = Math.round((p.height() / 2) * -1);
+	var css = {"transform": "scale(2,2) translateX("+ x + "px) translateY("+ y + "px)", "transition": "transform 0.5s", 
+			"z-index": 100};
+	console.log('css', css, offset);
+	d.css(css );
+	d.find('.chart').removeClass('chart');
+	$(z).show();
+	/*
+	$('#overlaycontent').removeClass('overlayshow');
+	$('#overlaycontent').addClass('overlaydim');
+	$('#overlaycontent').parent().on('transitionend', function() {
+		//document.getElementById('overlaycontent').style.visibility = 'hidden';
+	});*/
+	$('#overlaycontent').addClass('open').fadeOut();
+	
+	
 }
 
 function getBbox(epsg, latSw, latNe) {
@@ -269,6 +396,14 @@ function preZero(d) {
 
 
 function toggleOverlay() {
+	if ($('#overlaycontent').hasClass( 'open' )) {
+		$('.zoom figure').addClass('zoom-close');
+		$('.zoom figure').parent().bind('transitionend', function() {
+			$('#zoomcontainer').hide();
+		});
+		$('#overlaycontent').removeClass('open').fadeIn();
+		return;
+	}
     var transEndEventName = 'transitionend';
     if( $('.overlay').hasClass( 'open' ) ) {
         $('.overlay').removeClass( 'open' );
