@@ -303,6 +303,7 @@ html, body {
 
 .links {
 	 padding-top: 30px; 
+	 float:left;
 }
 
 .smallsnocontainer {
