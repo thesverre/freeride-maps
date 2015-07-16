@@ -21,6 +21,24 @@ li {
 	padding: 2px;
 	cursor: pointer;
 }
+.smallgallery {
+	margin-left: 20px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	margin-right: 100px;
+	width: 50%;
+	float:left;
+}
+.flexslider {
+	background:transparent;
+	border: transparent;
+}
+.flexslider .slides img{
+	height:65px;
+}
+.flex-direction-nav a:before{
+	color:rgba(255, 255, 255, 0.8);
+}
 
 #pac-input {
         background-color: #fff;
@@ -39,6 +57,25 @@ border: 1 px solid #4d90fe;
 
 }
 
+@keyframes controlpanelopen {
+    0%   {margin-top: 12px}
+    100% {margin-top: 100px}
+}
+@keyframes controlpanelclose {
+    0%   {margin-top: 100px}
+    100% {margin-top: 12px}
+}
+.controlpanel.open {
+	margin-top: 100px;
+	animation-name: controlpanelopen;
+    animation-duration: 1s;
+}
+.controlpanel.close {
+	margin-top: 12px;
+	animation-name: controlpanelclose;
+    animation-duration: 1s;
+}
+
 .controlpanel {
 	margin: 12px;
 	background-color: #fff;
@@ -54,12 +91,35 @@ border: 1 px solid #4d90fe;
 	position: relative;
 }
 
+@keyframes layer {
+    0%   {opacity: 0}
+    100% {opacity: 0.5}
+}
 .layerImg {
 	position: absolute;
 	top: 0px;
 	right: 0px;
 	opacity: 0.5;
+	animation-name: layer;
+    animation-duration: 4s;
 }
+
+#contentInfo {
+        margin-left: 12px;
+	background-color: #fff;
+	border: 2px solid #fff;
+	padding-left: 10px;
+        margin-top: 12px;
+        display:none;
+	border-radius: '3px';
+	box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+    width: 40%;
+    height: 90%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  background-clip: padding-box;
+}
+
 
 .close-button {
   background-position: -14px -62px;

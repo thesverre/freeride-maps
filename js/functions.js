@@ -36,11 +36,15 @@ function onClickMap(clickedLocation, inName) {
 			header =  elevation + ' moh, ' + distance + ' m fra ' + name + '<div class="position">' + clickedLocation.toString() + '</div>' ;
 		}
 		
-        var minihtml = '<div class="smallcontainer"><div style="float:left"><h3>' + header + '</h3></div>' + addSmallSnoInfo(clickedLocation) + '</div>';
+        var minihtml = '<div class="smallcontainer"><div style="float:left"><h3>' + header + '</h3></div>' + addSmallSnoInfo(clickedLocation) + '<div class="smallgallery"><div class="flexslider"><ul class="slides"></ul></div></div></div>';
+        
+        
         if ($('.overlay').hasClass('overlay-expanded')) {
-            $('#overlaycontent').html(minihtml + '<div style="clear:both;" class="largecontainer">' + addLargeContainer(clickedLocation) + '</div>');
+            $('#overlaycontent').html(minihtml + '<div style="clear:both;" class="largecontainer">' + addLargeContainer(clickedLocation, path, name) + '</div>');
             $('.largecontainer').data('data', [clickedLocation, path, name]);
         } else {
+        	$('.controlpanel').addClass('open');
+        	$('.controlpanel').removeClass( 'close' );
             $('#overlaycontent').html(minihtml + '<div style="clear:both;display:none" class="largecontainer">' + '</div>');
             $('.largecontainer').data('data', [clickedLocation, path, name] );
         };
@@ -48,6 +52,47 @@ function onClickMap(clickedLocation, inName) {
 		if (!$('.overlay').hasClass('open')) {
 			toggleOverlay();
 		}
+        
+        $.get('http://api.webcams.travel/rest?method=wct.webcams.list_nearby&devid=92b442ab55694e87848d5e379a14011e&format=json&lat=' + clickedLocation.lat() + '&lng='+ clickedLocation.lng(), function(result) {
+            result = $.parseJSON(result);
+            result.webcams.webcam.forEach(function(webcam) {
+                var li = '<li><a href="#webcam_' +webcam.webcamid +'" rel="modal:open" ><img src="' + webcam.daylight_thumbnail_url + '"></a></li>';
+                var m= '<div style="display:none" id="webcam_' +webcam.webcamid +'">';
+                m += '<img src="' + webcam.preview_url + '">';
+                m += '</div>';
+                $('#zoomcontainer').append($(m));
+                $('.slides').append($(li));
+                
+            });
+            $('.flexslider').flexslider({animation: "slide",
+                    animationLoop: false,
+                    itemWidth: 100,
+                    itemMargin: 5,
+                    controlNav: false
+                    });
+            var instagram_token = "219075471.b0d3f27.b0233b88474a4f5eb91b67711e52b8ec";
+            $.get('php/instagram.php?token=' + instagram_token + '&type=search&lat=' + clickedLocation.lat() + '&lng='+ clickedLocation.lng(), function(result) {
+                result = $.parseJSON(result);
+                console.log('r', result);
+                result.data.forEach(function(item) {
+                    $.get('php/instagram.php?token=' + instagram_token + '&type=location-media&id=' + item.id, function(r) {
+                        r = $.parseJSON(r);
+                        console.log('r', r);
+                        
+                        r.data.forEach(function(media) {
+                            if (media.images) {
+                                var d = new Date(media.created_time * 1000);
+                                var title = d.toDateString();
+                                title += ": " + media.location.name + " " + media.created_time;
+                                var li = '<li><a target="blank" href="' + media.link + '"><img title="'+ title +'" src="' + media.images.standard_resolution.url + '"></a></li>';
+                                $('.flexslider').data('flexslider').addSlide($(li));
+                           }
+                        });
+                    });
+                });
+            });
+        });
+        
 	
 
 	});
@@ -56,10 +101,8 @@ function onClickMap(clickedLocation, inName) {
 
 function addLargeContainer(clickedLocation, path, name) {
     var  img = '';
-    
-    
     img +='<div class=snocontainer>';
-    img +=addSnoLayer(clickedLocation, 'swewk', 'Snø endring');
+    img +=addSnoLayer(clickedLocation, 'swewk', 'Snø endring siste uke');
     img += addSnoLayer(clickedLocation, 'sd', 'Snødybde');
     img += addSnoLayer(clickedLocation, 'lwc', 'Snøtilstand');
     img += addSnoLayer(clickedLocation, 'sdfsw', 'Nysnødybde');
@@ -73,7 +116,6 @@ function addLargeContainer(clickedLocation, path, name) {
     bbox = bbox.replace(/,/g, '|');
     var senorgeUrl = 'http://www.senorge.no/?p=senorgeny&m=bmNVEGrey;MapLayer_swewk;&l=no&d=1433736000000&e=' + bbox + '&fh=0;2468';
     img +=addMetChart("Nedbør og temperatur siste 8 dager + 5 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=desc&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};fsw,cht=stckcol,mth=inst,clr=%233399FF|ds=hgts,da=29,id={pos};qsw,cht=stckcol,grp=1,mth=inst,clr=%23FF9933|ds=hgts,da=29,id={pos};qtt,cht=stckcol,grp=1,mth=inst,clr=red|ds=hgts,da=29,id={pos};tam,cht=line,mth=inst,drwd=3,clr=%23FF9933&nocache=0.2664557103998959', -8, 5, 700, 280, 'Data er hentet fra senorge.no. Se detaljer <a target="_blank"  href="'+ senorgeUrl+'">her</a>');
-
     img +='</div>';
     var html = '<div class="gallery">' +  img + '</div>';
     
@@ -109,29 +151,47 @@ function closeClickMap() {
 }
 
 function addSnoLayer(latLng, layer, name) {
-    var date = toDateStringISO(new Date());
-    
-    var startdate = toDateStringISO(addDays(new Date(), -3));
-    var enddate = toDateStringISO(addDays(new Date(), 3));
-    
-    var p = proj4(epsg32633).forward([ latLng.lng(), latLng.lat() ]);
-    var pos = p[0] + ";" + p[1];
-    name = name + ' <span id="info_' + layer + '"></span>' ;
-    var url = 'php/fetch.php?type=nve&x=' + p[0] + '&y=' + p[1] + '&layer=' + layer + '&startdate=' + startdate + '&enddate=' + enddate;
-    var result = getImg(latLng, 'http://gridwms.nve.no/WMS_server/wms_server.aspx?time=' + date + '&custRefresh=0.1345073445700109&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&STYLES=&VERSION=1.1.1&LAYERS='+ layer +'&SRS=EPSG:32633&BBOX=', latLng, name);
-    $.get(url, function(result) {
-        result = $.parseJSON(result);
-        
-        var pre = Math.round(result.MapGridValue[0] + result.MapGridValue[1] + result.MapGridValue[2]);
-        var post = Math.round(result.MapGridValue[4] + result.MapGridValue[5] + result.MapGridValue[6]);
-        if (layer == 'sd' || layer == 'lwc') {
-            pre = Math.round(pre / 3);
-            post = Math.round(post / 3);
-        }
-        $('#info_' + layer).html('('+ result.MapGridValue[3] + ' ' + result.Unit + ', ' + pre + ' ' + result.Unit +' / ' + post + ' ' + result.Unit + ')' );
-    });
-    return result;
+	var date = toDateStringISO(new Date());
+
+	var startdate = toDateStringISO(addDays(new Date(), -3));
+	var enddate = toDateStringISO(addDays(new Date(), 3));
+
+	var p = proj4(epsg32633).forward([ latLng.lng(), latLng.lat() ]);
+	var pos = p[0] + ";" + p[1];
+	name = name + ' <span id="info_' + layer + '"></span>';
+	var result = getImg(
+			latLng,
+			'http://gridwms.nve.no/WMS_server/wms_server.aspx?time='
+					+ date
+					+ '&custRefresh=0.1345073445700109&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&STYLES=&VERSION=1.1.1&LAYERS='
+					+ layer + '&SRS=EPSG:32633&BBOX=', latLng, name);
+	$.get('php/fetch.php?type=nve&x=' + p[0] + '&y=' + p[1] + '&layer=' + layer
+			+ '&startdate=' + startdate + '&enddate=' + enddate, function(
+			result) {
+		result = $.parseJSON(result);
+		console.log(result);
+
+		var pre = Math.round(result.MapGridValue[0] + result.MapGridValue[1]
+				+ result.MapGridValue[2]);
+		var post = Math.round(result.MapGridValue[4] + result.MapGridValue[5]
+				+ result.MapGridValue[6]);
+		if (layer == 'sd' || layer == 'lwc') {
+			pre = Math.round(pre / 3);
+			post = Math.round(post / 3);
+		}
+		if (layer == 'swewk') {
+			$('#info_' + layer).html(
+					'(' + result.MapGridValue[3] + ' ' + result.Unit + ')');
+		} else {
+			$('#info_' + layer).html(
+					'(' + result.MapGridValue[3] + ' ' + result.Unit + ', '
+							+ pre + ' ' + result.Unit + ' / ' + post + ' '
+							+ result.Unit + ')');
+		}
+	});
+	return result;
 }
+
 
 function addSmallSnoInfo(latLng) {
     var date = toDateStringISO(new Date());
@@ -327,52 +387,63 @@ function ControlPanel(controlDiv, map) {
   ui.appendChild(addLayer('radar_precipitation_intensity', 'Radar')); 
   ui.appendChild(addLayer('temperature_2m_regional', 'Temperatur')); 
   ui.appendChild(addLayer('wind_10m_regional', 'Vind')); 
-  ui.appendChild(addLayer('skred', 'Skredfare')); 
+  ui.appendChild(addLayer('snodybde', 'Snødybde')); 
   ui.appendChild(addLayer('bratthet', 'Bratthet'));
-  ui.appendChild(addLayer('none', 'Ingen', true)); 
+  ui.appendChild(addLayer('skog', 'Under skoggrense'));
+  ui.appendChild(addLayer('webcam', 'Webkamera'));
+  ui.appendChild(addLayer('none', 'Ingen')); 
   controlUI.appendChild(ui);
-
 }
 
 function addLayer(layerId, name, active ) {
 	var li = document.createElement('ul');
-	li.className = 'layer';
+	li.className = 'layer ' + layerId;
 	if (active) {
-		li.className += ' active';
+		li.className += ' active ';
 	}
 	li.innerHTML = name;
 	google.maps.event.addDomListener(li, 'click', function() {
-		map.overlayMapTypes.clear();
-		$('.active').removeClass('active');
-		$(this).addClass('active');
-		if (layerId == 'clouds_precipitation_regional') {
-			addYrLayer('clouds_precipitation_regional');
-		} else if (layerId == 'radar_precipitation_intensity') {
-			addYrLayer('radar_precipitation_intensity');
-		} else if (layerId == 'temperature_2m_regional') {
-			addYrLayer('temperature_2m_regional');
-		} else if (layerId == 'wind_10m_regional') {
-			addYrLayer('wind_10m_regional');
-
-		} else if (layerId == 'skred') {
-			loadWMS(map, 'http://gis3.nve.no/map/rest/services/SkredSnoAktR/MapServer/export?dpi=96&transparent=true&format=png8&bboxSR=3857&imageSR=3857&size=1024%2C1024&layers=show%3A0&f=image&', {
-			tileWidth : 1024,
-			tileHeight : 1024,
-			opacity : 0.5,
-			maxZoomVisible : 10
-			});
-		} else if (layerId == 'bratthet') {			
-		    loadWMS(map, 'http://gis.nve.no/ArcGIS/rest/services/Mapservices/Bakgrunnsdata/MapServer/export?dpi=96&transparent=true&format=png8' 
-		              + '&layers=show%3A52%2C53%2C54&bboxSR=3857&imageSR=3857&size=1024%2C1024&f=image&', {
-		        tileWidth : 1024,
-		        tileHeight : 1024,
-		        opacity : 0.5
-		    });
-		    
-		}
-
+		activateLayer(layerId);
 	});
 	return li;
+}
+
+function activateLayer(layerId) {
+	map.overlayMapTypes.clear();
+	$('.active').removeClass('active');
+	$('.' + layerId).addClass('active');
+	webcamstravel.easymap.unload();
+	if (layerId == 'clouds_precipitation_regional') {
+		addYrLayer('clouds_precipitation_regional');
+	} else if (layerId == 'radar_precipitation_intensity') {
+		addYrLayer('radar_precipitation_intensity');
+	} else if (layerId == 'temperature_2m_regional') {
+		addYrLayer('temperature_2m_regional');
+	} else if (layerId == 'wind_10m_regional') {
+		addYrLayer('wind_10m_regional');
+
+	} else if (layerId == 'snodybde') {
+		loadWMS(map, 'http://gis.nve.no/ArcGIS/rest/services/Mapservices/seNorge_SQL/MapServer/export?dpi=96&transparent=true&format=png8&layers=show%3A39&time=1433714400000%2C1433800799000&bboxSR=3857&imageSR=3857&size=1024%2C1024&f=image&', {
+			tileWidth : 1024,
+			tileHeight : 1024,
+			opacity : 1
+			});
+	} else if (layerId == 'bratthet') {			
+	    loadWMS(map, 'http://gis.nve.no/ArcGIS/rest/services/Mapservices/Bakgrunnsdata/MapServer/export?dpi=96&transparent=true&format=png8' 
+	              + '&layers=show%3A52%2C53%2C54&bboxSR=3857&imageSR=3857&size=1024%2C1024&f=image&', {
+	        tileWidth : 1024,
+	        tileHeight : 1024,
+	        opacity : 0.5
+	    });
+	} else if (layerId == 'skog') {			
+	    loadWMS(map, 'http://gislaugny.nve.no/ArcGIS/rest/services/Mapservices/seNorge_SQL/MapServer/export?dpi=96&transparent=true&format=png8&layers=show:29,30&time=1433714400000,1433800799000&bboxSR=3857&imageSR=3857&size=1024,1024&f=image', {
+	        tileWidth : 1024,
+	        tileHeight : 1024,
+	        opacity : 0.5
+	    });
+	} else if (layerId == 'webcam') {
+		webcamstravel.easymap.load(map);
+	}
 }
 
 function addYrLayer(layerId) {
@@ -419,6 +490,8 @@ function toggleOverlay() {
     var transEndEventName = 'transitionend';
     if( $('.overlay').hasClass( 'open' ) ) {
         $('.overlay').removeClass( 'open' );
+        $('.controlpanel').removeClass( 'open' );
+        $('.controlpanel').addClass( 'close' );
         $('.container').removeClass( 'overlay-open' );
         $('.overlay').addClass('close' );
         var onEndTransitionFn = function( ev ) {
@@ -437,3 +510,143 @@ function toggleOverlay() {
     }
 }
 
+function setCookie(cname,cvalue,exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires=" + d.toGMTString();
+    document.cookie = cname+"="+cvalue+"; "+expires;
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return null;
+}
+
+function addruler() {
+	 
+    ruler1 = new google.maps.Marker({
+        position: map.getCenter() ,
+        map: map,
+        draggable: true
+    });
+ 
+    ruler2 = new google.maps.Marker({
+        position: map.getCenter() ,
+        map: map,
+        draggable: true
+    });
+    ruler2.setTitle('hello')
+     
+    var ruler1label = new Label({ map: map });
+    var ruler2label = new Label({ map: map });
+    ruler1label.bindTo('position', ruler1, 'position');
+    ruler2label.bindTo('position', ruler2, 'position');
+ 
+    rulerpoly = new google.maps.Polyline({
+        path: [ruler1.position, ruler2.position] ,
+        //strokeColor: "#FFFF00",
+        strokeOpacity: .7,
+        strokeWeight: 2
+    });
+    rulerpoly.setMap(map);
+ 
+    ruler1label.set('text',"0m");
+    ruler2label.set('text',"0m");
+ 
+    google.maps.event.addListener(ruler1, 'drag', function() {
+        rulerpoly.setPath([ruler1.getPosition(), ruler2.getPosition()]);
+        ruler1label.set('text',distance( ruler1.getPosition(), ruler2.getPosition()));
+        ruler2label.set('text',distance( ruler1.getPosition(), ruler2.getPosition()));
+    });
+ 
+    google.maps.event.addListener(ruler2, 'drag', function() {
+        rulerpoly.setPath([ruler1.getPosition(), ruler2.getPosition()]);
+        ruler1label.set('text',distance( ruler1.getPosition(), ruler2.getPosition()));
+        ruler2label.set('text',distance( ruler1.getPosition(), ruler2.getPosition()));
+
+    });
+ 
+}
+
+function distance(lat1,lat2) {
+	var d = google.maps.geometry.spherical.computeDistanceBetween(lat1, lat2);
+	return Math.round(d) + "m";
+	/*
+    var R = 6371; // km (change this constant to get miles)
+    var dLat = (lat2-lat1) * Math.PI / 180;
+    var dLon = (lon2-lon1) * Math.PI / 180; 
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180 ) * Math.cos(lat2 * Math.PI / 180 ) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2); 
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    var d = R * c;
+    if (d>1) return Math.round(d)+"km";
+    else if (d<=1) return Math.round(d*1000)+"m";
+    return d;
+    */
+}
+
+//Define the overlay, derived from google.maps.OverlayView
+function Label(opt_options) {
+	// Initialization
+	this.setValues(opt_options);
+
+	// Label specific
+	var span = this.span_ = document.createElement('span');
+	span.style.cssText = 'position: relative; left: 8px;; top: -8px; ' +
+			  'white-space: nowrap; border: 0px; font-family:arial; font-weight:bold;' +
+			  'padding: 2px; xbackground-color: #ddd; '+
+				'opacity: 1; '+
+				'filter: alpha(opacity=75); ';
+
+	var div = this.div_ = document.createElement('div');
+	div.appendChild(span);
+	div.style.cssText = 'position: absolute; display: none';
+};
+Label.prototype = new google.maps.OverlayView;
+
+// Implement onAdd
+Label.prototype.onAdd = function() {
+	var pane = this.getPanes().overlayLayer;
+	pane.appendChild(this.div_);
+
+	
+	// Ensures the label is redrawn if the text or position is changed.
+	var me = this;
+	this.listeners_ = [
+		google.maps.event.addListener(this, 'position_changed',
+		function() { me.draw(); }),
+		google.maps.event.addListener(this, 'text_changed',
+		function() { me.draw(); })
+	];
+	
+};
+
+// Implement onRemove
+Label.prototype.onRemove = function() { this.div_.parentNode.removeChild(this.div_ );
+	// Label is removed from the map, stop updating its position/text.
+	for (var i = 0, I = this.listeners_.length; i < I; ++i) {
+		google.maps.event.removeListener(this.listeners_[i]);
+	}
+};
+
+// Implement draw
+Label.prototype.draw = function() {
+	var projection = this.getProjection();
+	var position = projection.fromLatLngToDivPixel(this.get('position'));
+
+	var div = this.div_;
+	div.style.left = position.x + 'px';
+	div.style.top = position.y + 'px';
+	div.style.display = 'block';
+
+	this.span_.innerHTML = this.get('text').toString();
+};
