@@ -33,7 +33,7 @@ function onClickMap(clickedLocation, inName) {
 		if (inName) {
 			header = inName +' (' + Math.round(elevation) + ' moh)';
 		} else {
-			header =  elevation + ' moh, ' + distance + ' m fra ' + name + '<div class="position">' + clickedLocation.toString() + '</div>' ;
+			header = name +' (' + Math.round(elevation) + ' moh)<div class="position">' + distance + ' m fra ' + clickedLocation.toString() + '</div>' ;
 		}
 		
         var minihtml = '<div class="smallcontainer"><div style="float:left"><h3>' + header + '</h3></div>' + addSmallSnoInfo(clickedLocation) + '<div class="smallgallery"><div class="flexslider"><ul class="slides"></ul></div></div></div>';
@@ -55,22 +55,29 @@ function onClickMap(clickedLocation, inName) {
         
         $.get('http://api.webcams.travel/rest?method=wct.webcams.list_nearby&devid=92b442ab55694e87848d5e379a14011e&format=json&lat=' + clickedLocation.lat() + '&lng='+ clickedLocation.lng(), function(result) {
             result = $.parseJSON(result);
+	    $('#largegallery').empty().append('<div id="slider" class="flexslider"><ul class="slides"></ul></div><div id="carousel" class="flexslider"><ul class="slides"></ul></div>');
+	    
+	       var ind = 0;
             result.webcams.webcam.forEach(function(webcam) {
-                var li = '<li><a href="#webcam_' +webcam.webcamid +'" rel="modal:open" ><img src="' + webcam.daylight_thumbnail_url + '"></a></li>';
-                var m= '<div style="display:none" id="webcam_' +webcam.webcamid +'">';
-                m += '<img src="' + webcam.preview_url + '">';
-                m += '</div>';
-                $('#zoomcontainer').append($(m));
-                $('.slides').append($(li));
+            	console.log('d', webcam);
+                var li = '<li><a onclick="openLargeGallery(' + (ind++)+')" ><img src="' + webcam.daylight_thumbnail_url + '"></a></li>';
+                var m= '<li>';
+                m += '<figure><a target="_blank" href="' + webcam.timelapse.link_day +'"><img src="' + webcam.preview_url + '"><figcaption>' + webcam.title + '</a></figcaption></figure>';
+                m += '</li>';
+                $('#slider .slides').append($(m));
+            	$('#carousel .slides').append($(m));
+                $('.smallgallery .slides').append($(li));
                 
             });
-            $('.flexslider').flexslider({animation: "slide",
+            if (!instagram_token) {
+            	$('.smallgallery .slides').append($('<li>Se flere bilder?<br><a onclick="signinInstagram()"><img style="height:20px" src="images/Instagram_signin.png"</a></li>'));
+            }
+            $('.smallgallery .flexslider').flexslider({animation: "slide",
                     animationLoop: false,
                     itemWidth: 100,
                     itemMargin: 5,
                     controlNav: false
                     });
-            var instagram_token = "219075471.b0d3f27.b0233b88474a4f5eb91b67711e52b8ec";
             $.get('php/instagram.php?token=' + instagram_token + '&type=search&lat=' + clickedLocation.lat() + '&lng='+ clickedLocation.lng(), function(result) {
                 result = $.parseJSON(result);
                 console.log('r', result);
@@ -78,16 +85,38 @@ function onClickMap(clickedLocation, inName) {
                     $.get('php/instagram.php?token=' + instagram_token + '&type=location-media&id=' + item.id, function(r) {
                         r = $.parseJSON(r);
                         console.log('r', r);
-                        
+                        var addflex = false;
                         r.data.forEach(function(media) {
                             if (media.images) {
                                 var d = new Date(media.created_time * 1000);
                                 var title = d.toDateString();
-                                title += ": " + media.location.name + " " + media.created_time;
-                                var li = '<li><a target="blank" href="' + media.link + '"><img title="'+ title +'" src="' + media.images.standard_resolution.url + '"></a></li>';
-                                $('.flexslider').data('flexslider').addSlide($(li));
+                                title += ": " + media.location.name;
+                                var li = '<li><a onclick="openLargeGallery(' + (ind++)+')"><img title="'+ title +'" src="' + media.images.standard_resolution.url + '"></a></li>';
+                                var m= '<li>';
+                                m += '<figure><a target="_blank" href="' + media.link +'"><img src="' + media.images.standard_resolution.url + '"><figcaption>' + title + '</a></figcaption></figure>';
+                                m += '</li>';
+                                if ($('#carousel').data('flexslider')) {
+                                	$('#carousel').data('flexslider').addSlide($(m));
+                                	$('#slider').data('flexslider').addSlide($(m));
+                                } else {
+                                	$('#slider .slides').append($(m));
+                                	$('#carousel .slides').append($(m));
+                                }
+                                var flexslider = $('.smallgallery .flexslider')
+                                if (flexslider.data('flexslider')) {
+                                	flexslider.data('flexslider').addSlide($(li));
+                                } else {
+                                	addflex= true;
+                                	flexslider.find('.slides').append($(li));
+                                }
                            }
                         });
+                        $('.smallgallery .flexslider').flexslider({animation: "slide",
+                            animationLoop: false,
+                            itemWidth: 100,
+                            itemMargin: 5,
+                            controlNav: false
+                            });
                     });
                 });
             });
@@ -97,6 +126,39 @@ function onClickMap(clickedLocation, inName) {
 
 	});
   });
+}
+
+function openLargeGallery(ind) {
+	$('#largegallery').modal();
+	if (!$('#carousel').data('flexslider')) {
+		 $('#carousel').flexslider({
+	         animation: "slide",
+	         controlNav: false,
+	         animationLoop: false,
+	         slideshow: false,
+	         itemWidth: 100,
+	         itemMargin: 5,
+	         asNavFor: '#slider'
+	       });
+	      
+	       $('#slider').flexslider({
+	         animation: "slide",
+	         controlNav: false,
+	         animationLoop: false,
+	         slideshow: false,
+	         sync: "#carousel"
+	       });
+	}
+       
+       function gotoInd(slider, ind) {
+    	   var animationSpeed = slider.vars.animationSpeed; 
+    	   slider.vars.animationSpeed = 0;
+    	   slider.flexAnimate(ind); 				
+    	   slider.vars.animationSpeed = animationSpeed;
+       }
+       
+       gotoInd($('#carousel').data('flexslider'), ind);
+       gotoInd($('#slider').data('flexslider'), ind);
 }
 
 function addLargeContainer(clickedLocation, path, name) {
@@ -528,6 +590,15 @@ function getCookie(cname) {
         }
     }
     return null;
+}
+
+function signinInstagram() {	
+	var port = location.port;
+	if (port) {
+		port = ':' + port;
+	}
+	var redirecturl = location.protocol + '//'  + location.hostname + port + location.pathname;
+	location.href = 'https://instagram.com/oauth/authorize/?client_id=b0d3f27f19c84e8f9de3db70ab464ee4&redirect_uri=' + redirecturl + '&response_type=token'
 }
 
 function addruler() {

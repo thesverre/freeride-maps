@@ -21,22 +21,76 @@ li {
 	padding: 2px;
 	cursor: pointer;
 }
+
+#largegallery {
+	width: 800px;
+	height: 800px;
+}
+
+#largegallery a, #largegallery a:hover {
+	color: #8A8C7E;
+	text-decoration: none;
+}
+
+#slider  {
+	margin: 0 0 20px;
+	padding-left: 50px;
+	padding-right: 50px;
+}
+#slider img {
+	box-shadow: 0 20px 20px rgba(0, 0, 0, .3);
+}
+#slider figcaption {
+	margin-top:20px;
+}
+#slider figure {
+	height: 600px;
+	width: auto;
+}
+#carousel {
+	padding-left: 50px;
+	padding-right: 50px;
+}
+#carousel .slides img {
+	height: 60px;
+	width: 100px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+}
+
+
+#carousel .slides figcaption {
+	display:none
+}
+
+.smallgallery .flexslider .slides img {
+	height: 63px;
+}
+
 .smallgallery {
+	
+	width: 50%;
+	float:left;
+}
+.smallgallery .flexslider {
+	padding-left: 50px;
+	padding-right: 50px;
 	margin-left: 20px;
 	margin-top: 10px;
 	margin-bottom: 10px;
 	margin-right: 100px;
-	width: 50%;
-	float:left;
-}
-.flexslider {
 	background:transparent;
 	border: transparent;
 }
-.flexslider .slides img{
-	height:65px;
+
+.smallgallery .flexslider .slides img {
+	height: 63px;
 }
-.flex-direction-nav a:before{
+
+.smallgallery .flexslider .slides li {
+	height:65px;
+	border:1px solid black;
+}
+.smallgallery .flex-direction-nav a:before{
 	color:rgba(255, 255, 255, 0.8);
 }
 
@@ -408,6 +462,14 @@ h3 {
  }
 .graphcontainer .chart{
 	 width: 90%;
+}
+
+#largegallery {
+	width:600px;
+	height: 400px;
+}
+.smallgallery {
+	display:none;
 }
 
 

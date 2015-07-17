@@ -10,7 +10,7 @@ function generate_sig($endpoint, $params, $secret) {
 }
 
 function get($endpoint, $params) {
-  $secret = 'be99396bcb5c416b8f52a5a5524c4b73';
+  $secret = '7d91f22408b24692b9caf668bb31c297';
   $fields_string = "";
   foreach($params as $key=>$value) { 
 	$fields_string .= $key.'='.$value.'&'; 
@@ -38,7 +38,6 @@ function get($endpoint, $params) {
 $type = $_GET['type'];  
 $access_token = $_GET['token'];
 
-$secret = 'be99396bcb5c416b8f52a5a5524c4b73';
 if ($type == "search") {
   $lat = $_GET['lat'];
   $lng = $_GET['lng'];
