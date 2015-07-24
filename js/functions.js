@@ -58,7 +58,6 @@ function onClickMap(clickedLocation, inName) {
 	    
 	       var ind = 0;
             result.webcams.webcam.forEach(function(webcam) {
-            	console.log('d', webcam);
                 var li = '<li><a onclick="openLargeGallery(' + (ind++)+')" ><img src="' + webcam.daylight_thumbnail_url + '"></a></li>';
                 var m= '<li>';
                 m += '<figure><a target="_blank" href="' + webcam.timelapse.link_day +'"><img src="' + webcam.preview_url + '"><figcaption>' + webcam.title + '</figcaption></a></figure>';
@@ -79,7 +78,6 @@ function onClickMap(clickedLocation, inName) {
                     });
             $.get('php/instagram.php?token=' + instagram_token + '&type=search&lat=' + clickedLocation.lat() + '&lng='+ clickedLocation.lng(), function(result) {
                 result = $.parseJSON(result);
-                console.log('r', result);
                 result.data.forEach(function(item) {
                     $.get('php/instagram.php?token=' + instagram_token + '&type=location-media&id=' + item.id, function(r) {
                         r = $.parseJSON(r);
@@ -453,6 +451,7 @@ function ControlPanel(controlDiv, map) {
   ui.appendChild(addLayer('bratthet', 'Bratthet'));
   ui.appendChild(addLayer('skog', 'Under skoggrense'));
   ui.appendChild(addLayer('webcam', 'Webkamera'));
+  ui.appendChild(addLayer('randopedia', 'Randopedia'));
   ui.appendChild(addLayer('none', 'Ingen')); 
   controlUI.appendChild(ui);
 }
@@ -505,6 +504,75 @@ function activateLayer(layerId) {
 	    });
 	} else if (layerId == 'webcam') {
 		webcamstravel.easymap.load(map);
+	} else if (layerId == 'randopedia') {
+	    $.get('php/fetch.php?type=randopedia', function(result) {
+	        result = $.parseJSON(result);
+	        
+	        result.tours.forEach(function(item) {
+	            
+	            item.mapGeoJson.features.forEach(function(f) {
+	                var opts = null;
+	                var path = [];
+	                if (f.rando_type == 10) {
+	                    opts = {
+	                        path: path,
+	                        strokeColor: 'red',
+	                        draggable: false,
+	                        strokeOpacity: 0.5,
+	                        strokeWeight: 5,
+	                        map : map
+	                    };
+	                } else if (f.rando_type == 12) {
+	                    opts = {
+	                            path: path,
+	                            strokeColor: 'red',
+	                            draggable: false,
+	                            strokeOpacity: 0.5,
+	                            strokeWeight: 8,
+	                            map : map
+	                        };
+	                } else if (f.rando_type == 11) {
+	                    opts = {
+	                            path: path,
+	                            strokeColor: 'black',
+	                            draggable: false,
+	                            strokeOpacity: 0.1,
+	                            strokeWeight: 4,
+	                            icons: [{
+	                                icon: {
+	                                    path: 'M 0,-1 0,1',
+	                                    strokeOpacity: 0.7,
+	                                    scale: 2
+	                                },
+	                                offset: '0',
+	                                repeat: '10px'
+	                              }],
+	                            map : map
+	                        };
+                    } 
+	                if (opts) {
+    	                f.geometry.coordinates.forEach(function(c) {
+    	                    path.push({lat: c[1], lng: c[0]})
+    	                });
+    	                var poly = new google.maps.Polyline(opts);
+    	                google.maps.event.addListener(poly, 'mouseup', function() {
+    	                    elevator.getElevationAlongPath({
+    	                        'path': path,
+    	                        'samples': 20
+    	                      }, function(results, status) {
+    	                          if (status != google.maps.ElevationStatus.OK) {
+    	                                return;
+    	                          }
+    	                          elevationpath = results;
+    	                          var msg = addPoly(poly, results, 'M -1,0 0,-1 1,0 0,1 z');
+    	                          
+    	                      });
+    	                } );
+	                }
+	            });
+	            
+	        });
+	    });
 	}
 }
 
@@ -605,7 +673,6 @@ function addruler() {
 	var projection = map.getProjection();
 	
 	var pos = projection.fromLatLngToPoint(map.getCenter());
-	console.log('pos', pos);
 	var scale = Math.pow(2,map.getZoom());
 	var latlng1 = map.getProjection().fromPointToLatLng(new google.maps.Point( ((pos.x*scale) - 100) /scale,pos.y));
 	var latlng2 = map.getProjection().fromPointToLatLng(new google.maps.Point( ((pos.x*scale) + 100) /scale,pos.y));
@@ -631,48 +698,126 @@ function addruler() {
     rulerpoly = new google.maps.Polyline({
         path: [ruler1.position, ruler2.position] ,
         //strokeColor: "#FFFF00",
-        xicons: [{
-            icon: {
-                path: "M0 556.41c0 46.398 4.34 88.38 13.022 125.934 8.678 37.554 20.696 70.184 36.052 97.892s34.884 52.078 58.586 73.108c23.7 21.032 49.406 38.224 77.112 51.576 27.706 13.35 59.336 24.198 94.888 32.546 35.552 8.346 71.856 14.188 108.91 17.528 37.054 3.338 77.78 5.006 122.178 5.006 44.732 0 85.628-1.668 122.68-5.006 37.054-3.34 73.442-9.184 109.16-17.528s67.512-19.192 95.388-32.546c27.876-13.354 53.746-30.544 77.616-51.576 23.87-21.030 43.566-45.404 59.086-73.108s27.622-60.336 36.302-97.892c8.68-37.556 13.020-79.536 13.020-125.934 0-82.788-27.708-154.394-83.118-214.816 3.004-8.012 5.758-17.108 8.262-27.29s4.84-24.702 7.010-43.564c2.17-18.862 1.336-40.642-2.504-65.346-3.838-24.704-10.932-49.906-21.284-75.612l-7.51-1.502c-5.342-1-14.106-0.75-26.29 0.752s-26.372 4.506-42.562 9.014c-16.19 4.506-37.054 13.186-62.592 26.038s-52.494 28.958-80.87 48.32c-48.736-13.352-115.668-20.030-200.792-20.030-84.792 0-151.556 6.678-200.294 20.030-28.376-19.362-55.5-35.468-81.37-48.32s-46.484-21.532-61.84-26.038c-15.354-4.508-29.71-7.428-43.062-8.764-13.354-1.336-21.784-1.752-25.288-1.252s-6.26 1.086-8.262 1.752c-10.348 25.706-17.442 50.906-21.28 75.612-3.838 24.704-4.674 46.486-2.504 65.346s4.508 33.382 7.010 43.564c2.504 10.182 5.258 19.278 8.262 27.29-55.414 60.422-83.122 132.026-83.122 214.816zM125.684 682.094c0-48.070 21.866-92.136 65.596-132.194 13.018-12.020 28.208-21.114 45.566-27.292 17.358-6.176 36.97-9.68 58.836-10.516 21.866-0.834 42.812-0.668 62.842 0.502 20.028 1.168 44.732 2.754 74.108 4.756 29.376 2.004 54.748 3.004 76.112 3.004 21.366 0 46.736-1 76.112-3.004 29.378-2.002 54.078-3.588 74.11-4.756 20.030-1.17 40.974-1.336 62.842-0.502 21.866 0.836 41.476 4.34 58.838 10.516 17.356 6.176 32.544 15.27 45.564 27.292 43.73 39.394 65.598 83.456 65.598 132.194 0 28.712-3.59 54.162-10.768 76.364-7.178 22.2-16.358 40.81-27.542 55.83s-26.704 27.79-46.568 38.306c-19.862 10.516-39.222 18.61-58.084 24.288-18.862 5.674-43.066 10.098-72.608 13.27-29.546 3.172-55.916 5.092-79.118 5.758-23.2 0.668-52.66 1.002-88.378 1.002s-65.178-0.334-88.378-1.002c-23.2-0.666-49.574-2.586-79.116-5.758s-53.744-7.596-72.606-13.27c-18.86-5.678-38.222-13.774-58.084-24.288s-35.386-23.282-46.568-38.306c-11.182-15.022-20.364-33.63-27.54-55.83-7.178-22.202-10.766-47.656-10.766-76.364zM640 672c0-53.019 28.654-96 64-96s64 42.981 64 96c0 53.019-28.654 96-64 96s-64-42.981-64-96zM256 672c0-53.019 28.654-96 64-96s64 42.981 64 96c0 53.019-28.654 96-64 96s-64-42.981-64-96z"
-            },
-            offset: '50%'
-          }],
+        icons: [
+            {
+                icon: {strokeColor: "red",path: 'M 0,0 0,10'},
+                offset: '50%'
+            }],
         draggable: false,
-        strokeOpacity: 1,
-        strokeWeight: 1
+        strokeOpacity: 0.5,
+        strokeWeight: 1,
+        map : map
     });
-    rulerpoly.setMap(map);
-    var  elevationfn =function() {
+    var samples = 20;
+    
+    var elevationpath;
+    var elevationfn =function() {
     	elevator.getElevationAlongPath({
     	    'path': [ruler1.getPosition(), ruler2.getPosition()],
-    	    'samples': 2
+    	    'samples': samples
     	  }, function(results, status) {
     		  if (status != google.maps.ElevationStatus.OK) {
     			    return;
     		  }
-    		  var elevation = results[0].elevation - results[1].elevation;
-    		  if (elevation < 0) {
-    			  elevation = elevation *-1;
-    		  }
-    		  var dist = google.maps.geometry.spherical.computeDistanceBetween(results[0].location, results[1].location);
-    		  var steepnes = elevation / dist;
-    		  var deg = Math.atan(steepnes) * (180/Math.PI);
-    		  ruler1label.set('text', Math.round(dist) +  'm (Høydeforskjell: ' + Math.round(elevation) + 'm, ' + Math.round(deg) + ' grader helning)');
+    		  elevationpath = results;
+    		  var msg = addPoly(rulerpoly, results);
+    		  ruler1label.set('text', msg);
     	  });
     };
     elevationfn();
+    google.maps.event.addListener(map, 'zoom_changed', function() {
+        if (elevationpath) {
+            var msg = addPoly(rulerpoly, elevationpath);
+            ruler1label.set('text', msg);
+        }
+    });
     google.maps.event.addListener(ruler1, 'dragend', elevationfn );
     google.maps.event.addListener(ruler2, 'dragend', elevationfn );
-    
-    google.maps.event.addListener(ruler1, 'drag', function() {
+    var updatepath = function() {
         rulerpoly.setPath([ruler1.getPosition(), ruler2.getPosition()]);
-        //ruler1label.set('text',distance( ruler1.getPosition(), ruler2.getPosition()));
-    });
-    google.maps.event.addListener(ruler2, 'drag', function() {
-        rulerpoly.setPath([ruler1.getPosition(), ruler2.getPosition()]);
-        //ruler1label.set('text',distance( ruler1.getPosition(), ruler2.getPosition()));
-    });
+    };
+    google.maps.event.addListener(ruler1, 'drag', updatepath);
+    google.maps.event.addListener(ruler2, 'drag', updatepath);
  
+}
+
+function addPoly(polyline, results, iconpath) {
+    var maxsteep = 0;
+    var icons = [];
+    var strokeWeight = 4;
+    var totalLength = findLengthInPixel(results[0].location, results[results.length- 1].location)
+    for(var i = 0; i< results.length -1 ; i++) {
+        var elevation = results[i].elevation - results[i + 1].elevation;
+        var dist = google.maps.geometry.spherical.computeDistanceBetween(results[i].location, results[i + 1].location);
+        var deg = calculateSteepnes(dist, elevation);
+        if (maxsteep < deg) {
+            maxsteep = deg;
+        }
+        var c = 'green';
+        if (deg > 50) {
+            c = 'black';
+        } else if (deg > 40) {
+            c = 'red';
+        } else if (deg > 30) {
+            c = 'orange';
+        } else if (deg > 20) {
+            c = 'yellow';
+        } else if (deg > 10) {
+            c = 'blue';
+        }
+        var path;
+        if (!iconpath) {
+            var len = Math.round((totalLength / strokeWeight) / (results.length));
+            path = 'M 0,0 0,' + len;
+        } else {
+            path = iconpath;
+        }
+        console.log('p',totalLength, path)
+        icons.push({
+            icon: {
+                strokeColor: c,
+                fillColor: c,
+                fillOpacity: 1,
+                path: path            },
+            offset: ((i+ 1)*(100 / results.length)) + '%'
+          });
+    };
+    var elevation = results[0].elevation - results[results.length -1].elevation;
+    var dist = google.maps.geometry.spherical.computeDistanceBetween(results[0].location, results[results.length -1].location);
+    var deg = calculateSteepnes(dist, elevation);
+    polyline.setOptions({
+          path: polyline.getPath() ,
+          //strokeColor: "#FFFF00",
+          icons: icons,
+          draggable: false,
+          strokeOpacity: 0.5,
+          strokeWeight: strokeWeight
+      });
+    return Math.round(dist) +  'm, Høydeforskjell: ' + Math.round(elevation) + 'm<br> ' + Math.round(deg) + ' &#176; helning, maks: ' + Math.round(maxsteep)+'&#176;)';
+}
+
+function findLengthInPixel(latlng1, latlng2) {
+    var pos1 = map.getProjection().fromLatLngToPoint(latlng1);
+    var pos2 = map.getProjection().fromLatLngToPoint(latlng2);
+    var scale = Math.pow(2,map.getZoom());
+    var diffx = ((pos2.x * scale) - (pos1.x * scale));
+    var diffy = ((pos2.y * scale) - (pos1.y * scale));
+    if (diffx < 0 ) {
+        diffx = diffx *-1;
+    }
+    if (diffy < 0 ) {
+        diffy = diffy *-1;
+    }
+    var len = Math.sqrt((diffx*diffx) + (diffy*diffy));
+    return Math.round(len)
+}
+
+function calculateSteepnes(dist, elevation) {
+    if (elevation < 0) {
+        elevation = elevation *-1;
+    }
+    var steepnes = elevation / dist;
+    return Math.atan(steepnes) * (180/Math.PI);
 }
 
 function distance(lat1,lat2) {
@@ -687,11 +832,12 @@ function Label(opt_options) {
 	this.setValues(opt_options);
 
 	// Label specific
-	var span = this.span_ = document.createElement('span');
+	var span = this.span_ = document.createElement('div');
 	span.className = 'label';
 
 	var div = this.div_ = document.createElement('div');
 	div.appendChild(span);
+	//div.className = 'label';
 	div.style.cssText = 'position: absolute; display: none';
 };
 Label.prototype = new google.maps.OverlayView;
@@ -733,6 +879,9 @@ function getAngleFromPoint(firstPoint, secondPoint) {
 
 // Implement draw
 Label.prototype.draw = function() {
+    if (!this.get('text')) {
+        return;
+    }
 	var projection = this.getProjection();
 	var pos1 = this.ruler1.getPosition();
 	var pos2 = this.ruler2.getPosition();
@@ -747,15 +896,15 @@ Label.prototype.draw = function() {
 	var firstpoint = projection.fromLatLngToDivPixel(pos1);
 	var secondpoint = projection.fromLatLngToDivPixel(pos2);
 	
-	var position = projection.fromLatLngToDivPixel(latlng);
+	var position = projection.fromLatLngToDivPixel(pos2);
 
 	var div = this.div_;
 	div.style.left = position.x + 'px';
 	div.style.top = position.y + 'px';
 	div.style.display = 'block';
 	var deg = (90 - Math.round(getAngleFromPoint(firstpoint, secondpoint)))*-1;
-	div.style.transform= 'rotate(' + deg+'deg)';
+	this.span_.style.transform= 'rotate(' + deg+'deg)';
 	//div.style.transform= 'rotate(45deg)';
 
-	this.span_.innerHTML = this.get('text').toString();
+	this.span_.innerHTML = '<div>'  + this.get('text').toString() + '</div>';
 };

@@ -1,7 +1,10 @@
 <?php
 
 $type = $_GET['type'];
-if ($type == "yr") {
+
+if ($type == "randopedia") {
+  $url = 'http://randopedia.net/randopedia/api/tours?liteTours=true';
+} else if ($type == "yr") {
 	$lat = $_GET['lat'];
 	$lon = $_GET['lon']; 
 	$url = "http://www.yr.no/_/websvc/latlon2p.aspx?lat={$lat}&lon=${lon}&spr=nob";
