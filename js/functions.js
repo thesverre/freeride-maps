@@ -609,14 +609,14 @@ function addruler() {
 	var scale = Math.pow(2,map.getZoom());
 	var latlng1 = map.getProjection().fromPointToLatLng(new google.maps.Point( ((pos.x*scale) - 100) /scale,pos.y));
 	var latlng2 = map.getProjection().fromPointToLatLng(new google.maps.Point( ((pos.x*scale) + 100) /scale,pos.y));
-    ruler1 = new google.maps.Marker({
+    var ruler1 = new google.maps.Marker({
         position: latlng1,
         map: map,
         draggable: true,
         icon: {scale: 5, anchor : new google.maps.Point(0,0), path: google.maps.SymbolPath.CIRCLE }
     });
  
-    ruler2 = new google.maps.Marker({
+    var ruler2 = new google.maps.Marker({
         position: map.getCenter() ,
         map: map,
         draggable: true,
