@@ -7,6 +7,7 @@ var map;
 var geocoder;
 var marker;
 var instagram_token;
+var elevator;
 function initializeMap() {
     var hash = location.hash;
     var zoom = 6;
@@ -43,6 +44,8 @@ function initializeMap() {
         }
     };
     map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+    
+    elevator = new google.maps.ElevationService();
 
     function createMapType(inType, layer, name) {
         return new google.maps.ImageMapType(
@@ -142,8 +145,21 @@ function initializeMap() {
                 });
 
             });
+    
     map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(div);
 
+    
+    var div = document.createElement('div');
+    div.className = 'measurement';
+    div.innerHTML = '<img src="images/measurement.png" width="24px">';
+    $(div).click(
+            function() {
+                addruler();
+
+            });
+    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(div);
+    
+    
     var norgeskartBounds = new google.maps.LatLngBounds(new google.maps.LatLng(
             57.5, 3), new google.maps.LatLng(71, 31.5));
 

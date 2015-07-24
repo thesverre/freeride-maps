@@ -24,7 +24,8 @@ function get($endpoint, $params) {
   $curl = curl_init();
   curl_setopt_array($curl, array(
     CURLOPT_RETURNTRANSFER => 1,
-    CURLOPT_URL => $url
+    CURLOPT_URL => $url,
+    CURLOPT_SSL_VERIFYPEER => false,
   ));
    // Send the request & save response to $resp
   $resp = curl_exec($curl);
