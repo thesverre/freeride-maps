@@ -53,7 +53,6 @@ function onClickMap(clickedLocation, inName) {
 		}
         
         $.get('http://api.webcams.travel/rest?method=wct.webcams.list_nearby&devid=92b442ab55694e87848d5e379a14011e&format=json&lat=' + clickedLocation.lat() + '&lng='+ clickedLocation.lng(), function(result) {
-            result = $.parseJSON(result);
 	    $('#largegallery').empty().append('<div id="slider" class="flexslider"><ul class="slides"></ul></div><div id="carousel" class="flexslider"><ul class="slides"></ul></div>');
 	    
 	       var ind = 0;
@@ -451,7 +450,6 @@ function ControlPanel(controlDiv, map) {
   ui.appendChild(addLayer('bratthet', 'Bratthet'));
   ui.appendChild(addLayer('skog', 'Under skoggrense'));
   ui.appendChild(addLayer('webcam', 'Webkamera'));
-  ui.appendChild(addLayer('randopedia', 'Randopedia'));
   ui.appendChild(addLayer('none', 'Ingen')); 
   controlUI.appendChild(ui);
 }
@@ -507,28 +505,38 @@ function activateLayer(layerId) {
 	} else if (layerId == 'randopedia') {
 	    $.get('php/fetch.php?type=randopedia', function(result) {
 	        result = $.parseJSON(result);
-	        
+	        console.log(result);
 	        result.tours.forEach(function(item) {
 	            
 	            item.mapGeoJson.features.forEach(function(f) {
 	                var opts = null;
 	                var path = [];
-	                if (f.rando_type == 10) {
+	                if (f.rando_type == 12) {
 	                    opts = {
 	                        path: path,
 	                        strokeColor: 'red',
 	                        draggable: false,
 	                        strokeOpacity: 0.5,
-	                        strokeWeight: 5,
+	                        strokeWeight: 8,
 	                        map : map
 	                    };
-	                } else if (f.rando_type == 12) {
+	                } else if (f.rando_type == 10) {
 	                    opts = {
 	                            path: path,
 	                            strokeColor: 'red',
 	                            draggable: false,
 	                            strokeOpacity: 0.5,
 	                            strokeWeight: 8,
+	                            icons: [{
+	                                icon: {
+	                                    path: 'M 0,-1 0,1',
+	                                    strokeOpacity: 0.3,
+	                                    strokeColor: 'black',
+	                                    scale: 2
+	                                },
+	                                offset: '0',
+	                                repeat: '10px'
+	                              }],
 	                            map : map
 	                        };
 	                } else if (f.rando_type == 11) {
@@ -555,7 +563,7 @@ function activateLayer(layerId) {
     	                    path.push({lat: c[1], lng: c[0]})
     	                });
     	                var poly = new google.maps.Polyline(opts);
-    	                google.maps.event.addListener(poly, 'mouseup', function() {
+    	                google.maps.event.addListener(poly, 'mouseup', function(event) {
     	                    elevator.getElevationAlongPath({
     	                        'path': path,
     	                        'samples': 20
@@ -565,8 +573,42 @@ function activateLayer(layerId) {
     	                          }
     	                          elevationpath = results;
     	                          var msg = addPoly(poly, results, 'M -1,0 0,-1 1,0 0,1 z');
+    	                          var content = '<h3>' + item.name + '(' ;
+    	                          if (f.rando_type == 10) {
+    	                        	  content += 'Opp- og nedstinging';
+    	                          } else if (f.rando_type == 11) {
+    	                        	  content += 'Opptur';
+    	                          } else if (f.rando_type == 12) {
+    	                        	  content += 'Nedover';
+    	                          }
+    	                          content += ')</h3>';
+    	                          content += '<p>' + item.shortDescription + '</p>';
+    	                          content += '<figure><div style="width:300px" id="elevation_chart"></div>';
+    	                          content += '<figcaption>'  +msg + ' </figcaption></figure>';
+    	                          content += '<p>Se detaljer på <a style="color:black" target="_blank" href="http://randopedia.net/#!/tours/'+ item.id  +'">randopedia.net</a></p>';
+    	                          
+    	                          var coordInfoWindow = new google.maps.InfoWindow();
+    	                          coordInfoWindow.setContent(content);
+    	                          coordInfoWindow.setPosition(event.latLng);
+    	                          coordInfoWindow.open(map);
+    	                          google.maps.event.addListener(coordInfoWindow, 'domready', function(event) {
+    	                        	  var data = new google.visualization.DataTable();
+        	                          data.addColumn('string', 'Sample');
+        	                          data.addColumn('number', 'Høyde over havet');
+        	                          for (var i = 0; i < results.length; i++) {
+        	                            data.addRow(['', results[i].elevation]);
+        	                          }
+        	                          var chart = new google.visualization.ColumnChart(document.getElementById('elevation_chart'));
+        	                          chart.draw(data, {
+        	                            height: 150,
+        	                            legend: 'none',
+        	                            titleY: 'Høyde over havet (m)'
+        	                          });
+    	                          });
+    	                          onClickMap(event.latLng);
     	                          
     	                      });
+    	                    return true;
     	                } );
 	                }
 	            });
@@ -697,15 +739,10 @@ function addruler() {
  
     rulerpoly = new google.maps.Polyline({
         path: [ruler1.position, ruler2.position] ,
-        //strokeColor: "#FFFF00",
-        icons: [
-            {
-                icon: {strokeColor: "red",path: 'M 0,0 0,10'},
-                offset: '50%'
-            }],
+        strokeColor: "red",
         draggable: false,
         strokeOpacity: 0.5,
-        strokeWeight: 1,
+        strokeWeight: 8,
         map : map
     });
     var samples = 20;
@@ -720,14 +757,14 @@ function addruler() {
     			    return;
     		  }
     		  elevationpath = results;
-    		  var msg = addPoly(rulerpoly, results);
+    		  var msg = addPoly(rulerpoly, results, 'M -1,0 0,-1 1,0 0,1 z');
     		  ruler1label.set('text', msg);
     	  });
     };
     elevationfn();
     google.maps.event.addListener(map, 'zoom_changed', function() {
         if (elevationpath) {
-            var msg = addPoly(rulerpoly, elevationpath);
+            var msg = addPoly(rulerpoly, elevationpath, 'M -1,0 0,-1 1,0 0,1 z');
             ruler1label.set('text', msg);
         }
     });
@@ -744,7 +781,7 @@ function addruler() {
 function addPoly(polyline, results, iconpath) {
     var maxsteep = 0;
     var icons = [];
-    var strokeWeight = 4;
+    var strokeWeight = 8;
     var totalLength = findLengthInPixel(results[0].location, results[results.length- 1].location)
     for(var i = 0; i< results.length -1 ; i++) {
         var elevation = results[i].elevation - results[i + 1].elevation;
@@ -778,11 +815,14 @@ function addPoly(polyline, results, iconpath) {
                 strokeColor: c,
                 fillColor: c,
                 fillOpacity: 1,
-                path: path            },
+                path: path,scale:4            },
             offset: ((i+ 1)*(100 / results.length)) + '%'
           });
     };
     var elevation = results[0].elevation - results[results.length -1].elevation;
+    if (elevation < 0) {
+    	elevation = elevation * -1;
+    }
     var dist = google.maps.geometry.spherical.computeDistanceBetween(results[0].location, results[results.length -1].location);
     var deg = calculateSteepnes(dist, elevation);
     polyline.setOptions({
@@ -793,7 +833,7 @@ function addPoly(polyline, results, iconpath) {
           strokeOpacity: 0.5,
           strokeWeight: strokeWeight
       });
-    return Math.round(dist) +  'm, Høydeforskjell: ' + Math.round(elevation) + 'm<br> ' + Math.round(deg) + ' &#176; helning, maks: ' + Math.round(maxsteep)+'&#176;)';
+    return Math.round(dist) +  'm, Høydeforskjell: ' + Math.round(elevation) + 'm, ' + Math.round(deg) + ' &#176; helning, maks: ' + Math.round(maxsteep)+'&#176;';
 }
 
 function findLengthInPixel(latlng1, latlng2) {

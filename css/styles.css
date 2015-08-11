@@ -136,14 +136,14 @@ border: 1 px solid #4d90fe;
 
 @keyframes controlpanelopen {
     0%   {margin-top: 12px}
-    100% {margin-top: 100px}
+    100% {margin-top: 24px}
 }
 @keyframes controlpanelclose {
-    0%   {margin-top: 100px}
+    0%   {margin-top: 24px}
     100% {margin-top: 12px}
 }
 .controlpanel.open {
-	margin-top: 100px;
+	margin-top: 24px;
 	animation-name: controlpanelopen;
     animation-duration: 1s;
 }

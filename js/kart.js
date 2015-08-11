@@ -8,7 +8,9 @@ var geocoder;
 var marker;
 var instagram_token;
 var elevator;
+google.load('visualization', '1', {packages: ['columnchart']});
 function initializeMap() {
+	
     var hash = location.hash;
     var zoom = 6;
     var center = new google.maps.LatLng(59.91387, 10.75225);
@@ -165,7 +167,8 @@ function initializeMap() {
 
     google.maps.event.addListener(map, 'maptypeid_changed', function() {
         if (map.getMapTypeId() == 'statkart_topo2'
-                || map.getMapTypeId() == 'statkart_raster') {
+                || map.getMapTypeId() == 'statkart_raster'
+                || map.getMapTypeId() == 'mix') {
             if (!norgeskartBounds.contains(map.getBounds().getCenter())) {
                 map.panToBounds(norgeskartBounds);
                 map.setZoom(5);
@@ -196,7 +199,7 @@ function initializeMap() {
         if (!loaded) {
             if (document.getElementById('map-canvas').offsetWidth > 1200) {
                 showLayer();
-                activateLayer('snodybde');
+                activateLayer('randopedia');
             }
             loaded = true;
         }
