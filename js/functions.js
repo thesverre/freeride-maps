@@ -1,28 +1,6 @@
 function onClickMap(clickedLocation, inName) {
-  var locations = [];
-  // Retrieve the clicked location and push it on the array
-  locations.push(clickedLocation);
- 
-	// http://www.yr.no/_/websvc/latlon2p.aspx?lat=59.91&lon=10.78&spr=nob
-  // https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gsradius=10000&gscoord=61.08485672110025%7C8.360595703125
-  
-  // Create a LocationElevationRequest object using the array's one value
-  var positionalRequest = {
-    'locations': locations
-  }
-
-  // Initiate the location request
-  elevator.getElevationForLocations(positionalRequest, function(results, status) {
-	var elevation = 'Ukjent';
-    if (status == google.maps.ElevationStatus.OK) {
-    	if (results[0]) {
-      	  elevation = Math.round(results[0].elevation);
-    	}
-    }
-      // Retrieve the first result
-      
-        // Open an info window indicating the elevation at the clicked position
-	$.get('php/fetch.php?type=yr&lat='+ clickedLocation.lat() + '&lon=' +clickedLocation.lng() , function(response) {
+	  // https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gsradius=10000&gscoord=61.08485672110025%7C8.360595703125
+	$.get('php/fetch.php?type=yr_position&lat='+ clickedLocation.lat() + '&lon=' +clickedLocation.lng() , function(response) {
 		var loc = $($.parseXML( response )).find('location').first();
 		var distance = loc.attr('d');
 		var translation = loc.find('translation');
@@ -30,20 +8,22 @@ function onClickMap(clickedLocation, inName) {
 		var name = translation.attr('name');
 		var header; 
 		if (inName) {
-			header = inName +' (' + Math.round(elevation) + ' moh)';
+			header = inName + '<span id="elevation"></span>';
 		} else {
-			header = name +' (' + Math.round(elevation) + ' moh)<div class="position">' + distance + ' m fra ' + clickedLocation.toString() + '</div>' ;
+			header = name + '<span id="elevation"></span><div class="position">' + distance + ' m fra ' + clickedLocation.toString() + '</div>' ;
 		}
 		
-        var minihtml = '<div class="smallcontainer"><div style="float:left"><h3>' + header + '</h3></div>' + addSmallSnoInfo(clickedLocation) + '<div class="smallgallery"><div class="flexslider"><ul class="slides"></ul></div></div></div>';
-        
+        var minihtml = '<div class="smallcontainer"><div style="float:left"><h3>' + header + '</h3><div id="yr"></div><div id="varsom"></div></div>' + addSmallSnoInfo(clickedLocation) + '<div class="smallgallery"><div class="flexslider"><ul class="slides"></ul></div></div></div>';
+        addVarsom(clickedLocation);
+        addYr(path, name);
+        getElevation(clickedLocation);
         
         if ($('.overlay').hasClass('overlay-expanded')) {
             $('#overlaycontent').html(minihtml + '<div style="clear:both;" class="largecontainer">' + addLargeContainer(clickedLocation, path, name) + '</div>');
             $('.largecontainer').data('data', [clickedLocation, path, name]);
         } else {
-        	$('.controlpanel').addClass('open');
-        	$('.controlpanel').removeClass( 'close' );
+        	$('.controlpanelContainer').addClass('open');
+        	$('.controlpanelContainer').removeClass( 'close' );
             $('#overlaycontent').html(minihtml + '<div style="clear:both;display:none" class="largecontainer">' + '</div>');
             $('.largecontainer').data('data', [clickedLocation, path, name] );
         };
@@ -121,8 +101,65 @@ function onClickMap(clickedLocation, inName) {
         
 	
 
-	});
+	
   });
+}
+
+function getElevation(latLng) {
+	var locations = [];
+	  locations.push(latLng);
+	  var positionalRequest = {
+	    'locations': locations
+	  }
+	  elevator.getElevationForLocations(positionalRequest, function(results, status) {
+		var elevation = 'Ukjent';
+	    if (status == google.maps.ElevationStatus.OK) {
+	    	if (results[0]) {
+	      	  elevation = Math.round(results[0].elevation);
+	      	  $('#elevation').html(' (' + Math.round(elevation) + ' moh)');
+	    	}
+	    }
+	  });
+}
+
+function addYr(path) {
+	$.get('php/fetch.php?type=yr&position=' + path, function(response) {
+		//console.log('yr', response);
+		var r = $($.parseXML( response ))
+		var time = r.find('tabular').find('time').first();
+		var ttime = r.find('text').find('time').first();
+		var symbol = time.find('symbol').attr('var');
+		var temperature = time.find('temperature').attr('value');
+		var windspeed = time.find('windSpeed').attr('mps');
+		console.log(time, symbol);
+		var tag = $('#yr');
+		var title = ttime.find('body').text();
+		title = title.replace('<strong>', '')
+		title = title.replace('</strong>', '\n')
+		title += '\n\nVærvarsel fra yr.no, levert av NRK og Meteorologisk institutt';
+		var html = '<a target="_blank" href="http://www.yr.no' + path + '"><div title="' + title + '"><img src="http://symbol.yr.no/grafikk/sym/b48/'+ symbol +'.png"><span class="temperature">' + temperature + '° | ' + windspeed + ' m/s</span></div></a>';
+		tag.html(html);
+		
+	});
+}
+function addVarsom(latLng) {
+	var date = toDateStringISO(new Date());
+    //date="2015-01-01";
+	var lat =  latLng.lat();
+	var lon =  latLng.lng();
+
+	$.get('php/fetch.php?type=varsom&lat=' + lat + "&lon=" + lon + "&startdate=" + date + "&enddate=" + date, function(result) {
+		result = $.parseJSON(result);
+		console.log('varsom', result);
+		result = result[0];
+		var tag = $('#varsom');
+		var title = '';
+		if (result.AvalancheDanger) {
+			title = result.AvalancheDanger +'\n\n' + result.AvalancheWarning;
+			var html = '<a target="_blank" href="http://varsom.no/Snoskred/' + result.RegionName+ '"><img title="'+ title + '"  src="http://varsom.no/Templates/Styles/Images/AvalanceWarningLevels/' + result.DangerLevel +'_standard.png"></a>';
+			tag.html(html);
+		}
+	}); 
 }
 
 function openLargeGallery(ind) {
@@ -168,7 +205,7 @@ function addLargeContainer(clickedLocation, path, name) {
     img += '<div class="snodesc">*I dag -/+ 3 dager</div>';
     img +='</div>';
     img +='<div class=graphcontainer>';
-    img +=  getRawImg('http://www.yr.no' + path + '/avansert_meteogram.png', 'Værvarsel '  + name, 'Data er hentet fra yr.no.');
+    img +=  getRawImg('http://www.yr.no' + path + '/avansert_meteogram.png', 'Værvarsel '  + name, 'Værvarsel fra yr.no, levert av NRK og Meteorologisk institutt');
 
     //img +=addMetChart("Nysnø siste 20 dager + 10 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=none&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};swewk,cht=col,mth=inst&nocache=0.7853575034532696', -10, 5, 700, 300);
     var bbox = getBbox(epsg32633, map.getBounds().getSouthWest(), map.getBounds().getNorthEast());
@@ -506,7 +543,7 @@ function activateLayer(layerId) {
 	    $.get('php/fetch.php?type=randopedia', function(result) {
 	        result = $.parseJSON(result);
 	        console.log(result);
-	        result.tours.forEach(function(item) {
+	        result.tourItems.forEach(function(item) {
 	            
 	            item.mapGeoJson.features.forEach(function(f) {
 	                var opts = null;
@@ -662,8 +699,8 @@ function toggleOverlay() {
     var transEndEventName = 'transitionend';
     if( $('.overlay').hasClass( 'open' ) ) {
         $('.overlay').removeClass( 'open' );
-        $('.controlpanel').removeClass( 'open' );
-        $('.controlpanel').addClass( 'close' );
+        $('.controlpanelContainer').removeClass( 'open' );
+        $('.controlpanelContainer').addClass( 'close' );
         $('.container').removeClass( 'overlay-open' );
         $('.overlay').addClass('close' );
         var onEndTransitionFn = function( ev ) {

@@ -39,6 +39,7 @@ function initializeMap() {
         mapTypeControl : true,
         tilt : 45,
         mapTypeControlOptions : {
+        	position: google.maps.ControlPosition.LEFT_BOTTOM,
             mapTypeIds : [ 'mix', google.maps.MapTypeId.TERRAIN,
                     'statkart_topo2', 'statkart_raster', 'ut', 'eniro_aerial',
                     google.maps.MapTypeId.HYBRID ],
@@ -113,9 +114,11 @@ function initializeMap() {
 
     var searchBox = new google.maps.places.SearchBox(input);
     input.index = 1;
-    map.controls[google.maps.ControlPosition.LEFT_TOP].push(input);
+    //map.controls[google.maps.ControlPosition.LEFT_TOP].push(input);
 
     var controlPanelContainer = document.createElement('div');
+    controlPanelContainer.className = 'controlpanelContainer';
+    controlPanelContainer.appendChild(input);
     var controlPanelDiv = document.createElement('div');
     controlPanelDiv.id = 'controlPanel';
     var controlPanel = new ControlPanel(controlPanelDiv, map);

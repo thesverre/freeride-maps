@@ -4,6 +4,34 @@ html, body, #map-canvas {
 	padding: 0px
 }
 
+#varsom {
+	float:left;
+	position: relative;
+    top: -22px;
+}
+
+#yr {
+	position: relative;
+    top: -22px;
+    left: 10px;
+	float:left;
+}
+#yr img{
+	opacity:0.5;
+}
+#yr a{
+    text-decoration: none;
+}
+#yr span {
+	position: relative;
+    top: 13px;
+    left: -50px;
+    font-weight: bold;
+    opacity: 0.7;
+    font-size: 12px;
+
+}
+
 ul {
 	margin: 0;
 	padding: 0;
@@ -136,18 +164,18 @@ border: 1 px solid #4d90fe;
 
 @keyframes controlpanelopen {
     0%   {margin-top: 12px}
-    100% {margin-top: 24px}
+    100% {margin-top: 100px}
 }
 @keyframes controlpanelclose {
-    0%   {margin-top: 24px}
+    0%   {margin-top: 100px}
     100% {margin-top: 12px}
 }
-.controlpanel.open {
-	margin-top: 24px;
+.controlpanelContainer.open {
+	margin-top: 100px;
 	animation-name: controlpanelopen;
     animation-duration: 1s;
 }
-.controlpanel.close {
+.controlpanelContainer.close {
 	margin-top: 12px;
 	animation-name: controlpanelclose;
     animation-duration: 1s;
