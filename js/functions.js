@@ -55,51 +55,8 @@ function onClickMap(clickedLocation, inName) {
                     itemMargin: 5,
                     controlNav: false
                     });
-            $.get('php/instagram.php?token=' + instagram_token + '&type=search&lat=' + clickedLocation.lat() + '&lng='+ clickedLocation.lng(), function(result) {
-                result = $.parseJSON(result);
-                result.data.forEach(function(item) {
-                    $.get('php/instagram.php?token=' + instagram_token + '&type=location-media&id=' + item.id, function(r) {
-                        r = $.parseJSON(r);
-                        console.log('r', r);
-                        var addflex = false;
-                        r.data.forEach(function(media) {
-                            if (media.images) {
-                                var d = new Date(media.created_time * 1000);
-                                var title = d.toDateString();
-                                title += ": " + media.location.name;
-                                var li = '<li><a onclick="openLargeGallery(' + (ind++)+')"><img title="'+ title +'" src="' + media.images.thumbnail.url + '"></a></li>';
-                                var m= '<li>';
-                                m += '<figure><a target="_blank" href="' + media.link +'"><img src="' + media.images.standard_resolution.url + '"><figcaption>' + title + '</figcaption></a></figure>';
-                                m += '</li>';
-                                var img = '<li><img src="' + media.images.thumbnail.url + '"></li>';
-                                if ($('#carousel').data('flexslider')) {
-                                	$('#carousel').data('flexslider').addSlide($(img));
-                                	$('#slider').data('flexslider').addSlide($(m));
-                                } else {
-                                	$('#slider .slides').append($(m));
-                                	$('#carousel .slides').append($(img));
-                                }
-                                var flexslider = $('.smallgallery .flexslider')
-                                if (flexslider.data('flexslider')) {
-                                	flexslider.data('flexslider').addSlide($(li));
-                                } else {
-                                	addflex= true;
-                                	flexslider.find('.slides').append($(li));
-                                }
-                           }
-                        });
-                        $('.smallgallery .flexslider').flexslider({animation: "slide",
-                            animationLoop: false,
-                            itemWidth: 100,
-                            itemMargin: 5,
-                            controlNav: false
-                            });
-                    });
-                });
-            });
+            addInstagram(clickedLocation, ind);
         });
-        
-	
 
 	
   });
@@ -121,7 +78,81 @@ function getElevation(latLng) {
 	    }
 	  });
 }
+var instagramGallery = '';
+function addInstagram(clickedLocation, ind) {
+	instagramGallery = '';
+	if (!instagram_token) {
+		return;
+	}
+	
+	$.get('php/instagram.php?token=' + instagram_token + '&type=search&lat=' + clickedLocation.lat() + '&lng='+ clickedLocation.lng(), function(result) {
+        result = $.parseJSON(result);
+        result.data.forEach(function(item) {
+            $.get('php/instagram.php?token=' + instagram_token + '&type=location-media&id=' + item.id, function(r) {
+                r = $.parseJSON(r);
+                console.log('instagram', r);
+                var addflex = false;
+                var ig = '';
+                r.data.forEach(function(media) {
+                    if (media.images) {
+                        var d = new Date(media.created_time * 1000);
+                        var title = d.toDateString();
+                        if (media.caption) {
+                        	title += ": " + media.caption.text;
+                        }
+                        var li = '<li><a onclick="openLargeGallery(' + (ind)+')"><img title="'+ title +'" src="' + media.images.thumbnail.url + '"></a></li>';
+                        var m= '<li>';
+                        m += '<figure><a target="_blank" href="' + media.link +'"><img src="' + media.images.standard_resolution.url + '"><figcaption>' + title + '</figcaption></a></figure>';
+                        ig +='<a target="_blank" onclick="openLargeGallery(' + (ind)+')"><img title="'+ title + '" src="' + media.images.thumbnail.url + '"></a>';
+                        m += '</li>';
+                        ind++;
+                        var img = '<li><img src="' + media.images.thumbnail.url + '"></li>';
+                        if ($('#carousel').data('flexslider')) {
+                        	$('#carousel').data('flexslider').addSlide($(img));
+                        	$('#slider').data('flexslider').addSlide($(m));
+                        } else {
+                        	$('#slider .slides').append($(m));
+                        	$('#carousel .slides').append($(img));
+                        }
+                        var flexslider = $('.smallgallery .flexslider')
+                        if (flexslider.data('flexslider')) {
+                        	flexslider.data('flexslider').addSlide($(li));
+                        } else {
+                        	addflex= true;
+                        	flexslider.find('.slides').append($(li));
+                        }
+                   }
+                });
+                $("#instagramgallery").append(ig);
+                instagramGallery += ig;
+                $('.smallgallery .flexslider').flexslider({animation: "slide",
+                    animationLoop: false,
+                    itemWidth: 100,
+                    itemMargin: 5,
+                    controlNav: false
+                    });
+            });
+        });
+    });
 
+}
+
+function addTwitter(name) {
+	$.get('php/twitter.php?q=' + name, function(r) {
+        r = $.parseJSON(r);
+        console.log('twitter', r);
+        var html = '';
+        r.statuses.forEach(function(status){
+        	var text = status.text;
+        	status.entities.urls.forEach(function(url) {
+        		text = status.text.substring(0, url.indices[0]) + '<a target="_blank" href="'+ url.url +'">' + url.display_url +'</a>' + status.text.substr(url.indices[1]);
+        	});
+        	html += '<div>' + text + '<p>' + new Date(status.created_at).toLocaleString() + ' @' + status.user.screen_name +'</p></div>';
+        	
+        })        
+        $('#twitter').html(html);
+	});
+}
 function addYr(path) {
 	$.get('php/fetch.php?type=yr&position=' + path, function(response) {
 		//console.log('yr', response);
@@ -130,8 +161,7 @@ function addYr(path) {
 		var ttime = r.find('text').find('time').first();
 		var symbol = time.find('symbol').attr('var');
 		var temperature = time.find('temperature').attr('value');
-		var windspeed = time.find('windSpeed').attr('mps');
-		console.log(time, symbol);
+		var windspeed = Math.round(time.find('windSpeed').attr('mps'));
 		var tag = $('#yr');
 		var title = ttime.find('body').text();
 		title = title.replace('<strong>', '')
@@ -205,7 +235,7 @@ function addLargeContainer(clickedLocation, path, name) {
     img += '<div class="snodesc">*I dag -/+ 3 dager</div>';
     img +='</div>';
     img +='<div class=graphcontainer>';
-    img +=  getRawImg('http://www.yr.no' + path + '/avansert_meteogram.png', 'Værvarsel '  + name, 'Værvarsel fra yr.no, levert av NRK og Meteorologisk institutt');
+    img += '<a target="_blank" href="http://www.yr.no' + path + '">' + getRawImg('http://www.yr.no' + path + '/avansert_meteogram.png', 'Værvarsel '  + name, 'Værvarsel fra yr.no, levert av NRK og Meteorologisk institutt') + '</a>';
 
     //img +=addMetChart("Nysnø siste 20 dager + 10 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=none&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};swewk,cht=col,mth=inst&nocache=0.7853575034532696', -10, 5, 700, 300);
     var bbox = getBbox(epsg32633, map.getBounds().getSouthWest(), map.getBounds().getNorthEast());
@@ -213,29 +243,28 @@ function addLargeContainer(clickedLocation, path, name) {
     var senorgeUrl = 'http://www.senorge.no/?p=senorgeny&m=bmNVEGrey;MapLayer_swewk;&l=no&d=1433736000000&e=' + bbox + '&fh=0;2468';
     img +=addMetChart("Nedbør og temperatur siste 8 dager + 5 dagers varsel", clickedLocation, 'http://h-web01.nve.no/chartserver/ShowChart.aspx?req=getchart&ver=1.0&time={fromdate}T0000;{todate}T0000&chs={width}x{height}&lang=no&chlf=desc&chsl=0;+0&chhl=2|0|2&timeo=-06:00&app=3d&chd=ds=hgts,da=29,id={pos};fsw,cht=stckcol,mth=inst,clr=%233399FF|ds=hgts,da=29,id={pos};qsw,cht=stckcol,grp=1,mth=inst,clr=%23FF9933|ds=hgts,da=29,id={pos};qtt,cht=stckcol,grp=1,mth=inst,clr=red|ds=hgts,da=29,id={pos};tam,cht=line,mth=inst,drwd=3,clr=%23FF9933&nocache=0.2664557103998959', -8, 5, 700, 280, 'Data er hentet fra senorge.no. Se detaljer <a target="_blank"  href="'+ senorgeUrl+'">her</a>');
     img +='</div>';
-    var html = '<div class="gallery">' +  img + '</div>';
+    var html = '<div class="gallery">' +  img ;
     
     var p = proj4(epsg32633).forward([ clickedLocation.lng(), clickedLocation.lat() ]);
-    html +='<div class="links">';
-    html +='Se detaljer:';
+    html +='<div style="clear:both"></div>';
+    html += '<div id="instagramgallery">' +  instagramGallery + '</div>';
+    html += '<div id="twitter"></div>';
+    html += '<div class="links">';
     html +='<br><a target="_blank"  href="http://ut.no/finn/?lat='+ clickedLocation.lat() +'&lon=' + clickedLocation.lng()+'&types=trip&type=geolocation">ut.no</a>';
-    html +='<br><a target="_blank"  href="http://www.yr.no'+ path+'">yr.no</a>';
-    html +='<br><a target="_blank"  href="'+ senorgeUrl+'">senorge.no</a>';
-    html +='<br><a target="_blank"  href="https://www.google.com/maps?ll='+ clickedLocation.lat() +',' + clickedLocation.lng()+'&z=' + map.getZoom() +'">maps.google.com</a>';
-    html +='<br><a target="_blank"  href="http://www.norgeskart.no/#' + (map.getZoom()-2) + '/' + p[0] + '/' + p[1] + '">norgeskart.no</a>';
-    html +='<br><a target="_blank" href="http://www.lookr.com/no#!explore/' + clickedLocation.lat() + ';' + clickedLocation.lng() + '">lookr.com</a>';
-    html +='<br><a target="_blank"  href="https://www.youtube.com/results?search_query=' + name +'">youtube.com</a>';
-    html +='<br><a target="_blank"  href="https://vimeo.com/search?q=' + name +'">vimeo.com</a>';
-    html +='<br><a target="_blank"  href="http://www.gramfeed.com/instagram/map#/' + clickedLocation.lat() +',' + clickedLocation.lng() + '/1000/-">gramfeed.com</a>';
+    html +=' <a target="_blank"  href="http://www.yr.no'+ path+'">yr.no</a>';
+    html +=' <a target="_blank"  href="'+ senorgeUrl+'">senorge.no</a>';
+    html +=' <a target="_blank"  href="https://www.google.com/maps?ll='+ clickedLocation.lat() +',' + clickedLocation.lng()+'&z=' + map.getZoom() +'">maps.google.com</a>';
+    html +=' <a target="_blank"  href="http://www.norgeskart.no/#' + (map.getZoom()-2) + '/' + p[0] + '/' + p[1] + '">norgeskart.no</a>';
+    html +=' <a target="_blank" href="http://www.lookr.com/no#!explore/' + clickedLocation.lat() + ';' + clickedLocation.lng() + '">lookr.com</a>';
+    html +=' <a target="_blank"  href="https://www.youtube.com/results?search_query=' + name +'">youtube.com</a>';
+    html +=' <a target="_blank"  href="https://vimeo.com/search?q=' + name +'">vimeo.com</a>';
+    html +=' <a target="_blank"  href="http://www.gramfeed.com/instagram/map#/' + clickedLocation.lat() +',' + clickedLocation.lng() + '/1000/-">gramfeed.com</a>';
     
-    
-    html +='<br><br>Lenker:';
-    html +='<br><a target="_blank"  href="http://www.varsom.no">varsom.no</a>';
-    html +='<br><a target="_blank"  href="http://sjogg.no">sjogg.no</a>';
-    html +='<br><a target="_blank"  href="http://randopedia.net">randopedia.no</a>';
-    
+    html += '<br><br>';
     
     html += '</div>';
+    html += '</div>'
+    addTwitter( name);
     return html;
 }
 
@@ -334,7 +363,7 @@ function addMetChart(name, latLng, url, fromDays, toDays, width, height, desc) {
   url = url.replace(/\{pos}/g, pos);
   url = url.replace(/\{width}/g, width);
   url = url.replace(/\{height}/g, height);
-  return getRawImg(url, name, desc);
+  return getRawImg(url, name, desc, true);
 }
 
 
@@ -351,8 +380,12 @@ function toDateString(date) {
 function toDateStringISO(date) {
   return date.getFullYear() + '-' + preZero((date.getMonth() + 1)) + '-' + preZero(date.getDate());
 }
-function getRawImg(url, name, desc) {
-var r = '<figure class="chart" onclick="zoomElm(this)">' 
+function getRawImg(url, name, desc, zoomElm) {
+var onc = '';
+if (zoomElm) {
+	onc = onclick="zoomElm(this)";
+}
+var r = '<figure class="chart" '+ onc +' >' 
 if (name) {
   r += '<figcaption>' + name + '</figcaption>';
 }
@@ -381,8 +414,8 @@ var diff = scale[zoom]*4;
 var diffx = Math.round(diff*1.333333);
 var diffy = diff;
 var bbox = (r[0]- diffx) + "," + (r[1] - diffy) + "," + (r[0] + diffx) + "," + (r[1] + diffy);
-width = 400;
-height = 280;
+width = 500;
+height = 352;
 	//var bbox = getBbox(epsg32633, latSw, latNe);
 	// var baseImage =
 	// 'http://openwms.statkart.no/skwms1/wms.topo2?LAYERS=topo2_WMS&TRANSPARENT=TRUE&FORMAT=image/png&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&STYLES=&SRS=EPSG:32633&WIDTH=256&HEIGHT=256&BBOX='

@@ -101,7 +101,7 @@ function initializeMap() {
                 });
 
     }
-    map.mapTypes.set('mix', createMapType('mix', 'topo2', 'Miks av basiskart'));
+    map.mapTypes.set('mix', createMapType('mix', 'topo2', 'Miks'));
     map.mapTypes.set('statkart_topo2', createMapType('sk', 'topo2',
             'Statkart topograkrafisk'));
     map.mapTypes.set('statkart_raster', createMapType('sk', 'toporaster3',
