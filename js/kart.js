@@ -1,3 +1,6 @@
+/// gdal_translate -of Gtiff -co "tfw=yes" -a_ullr -112565.38795656362 6685298.020140334 687434.6120434364 7285298.020140334  -a_srs "+proj=utm +zone=33 +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "wms.toporaster3.png" "input_tfw.tiff"
+
+
 proj4.defs('EPSG:32633','+proj=utm +zone=33 +ellps=WGS84 +datum=WGS84 +units=m +no_defs');
 proj4.defs('EPSG:3857', '+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +a=6378137 +b=6378137 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
 var epsg3857 = proj4('EPSG:3857');
@@ -8,12 +11,13 @@ var geocoder;
 var marker;
 var instagram_token;
 var elevator;
+var embedded = location.href.indexOf('embedded=true')> 0;
 google.load('visualization', '1', {packages: ['columnchart']});
 function initializeMap() {
 	
     var hash = location.hash;
     var zoom = 6;
-    var center = new google.maps.LatLng(59.91387, 10.75225);
+    var center = new google.maps.LatLng(60.884256,8.646952);
     instagram_token = getCookie('instagram_token');
     if (hash) {
         if (hash.startsWith("#access_token=")) {
@@ -23,27 +27,29 @@ function initializeMap() {
         var a = hash.substring(1).split(',');
         if (a.length == 3) {
             zoom = parseInt(a[0]);
-            center = new google.maps.LatLng(parseFloat(a[1]), parseFloat(a[2]))
+            center = new google.maps.LatLng(parseFloat(a[1]), parseFloat(a[2]));
+            console.log('c', center);
         }
+        
 
     }
     geocoder = new google.maps.Geocoder();
-
+    var smallwidth = $( document ).width() < 600;
     var mapOptions = {
         zoom : zoom,
         center : center,
         rotateControl : true,
-        scaleControl : true,
+        scaleControl : false,
         panControl : false,
+        zoomControl : false,
         mapTypeId : 'mix',
         mapTypeControl : true,
-        tilt : 45,
         mapTypeControlOptions : {
-        	position: google.maps.ControlPosition.LEFT_BOTTOM,
+        	position: smallwidth ? google.maps.ControlPosition.RIGHT_TOP : google.maps.ControlPosition.BOTTOM_LEFT,
             mapTypeIds : [ 'mix', google.maps.MapTypeId.TERRAIN,
                     'statkart_topo2', 'statkart_raster', 'ut', 'eniro_aerial',
                     google.maps.MapTypeId.HYBRID ],
-            style : google.maps.MapTypeControlStyle.HORIZONTAL_BAR
+            style : smallwidth ? google.maps.MapTypeControlStyle.DROPDOWN_MENU : google.maps.MapTypeControlStyle.HORIZONTAL
         }
     };
     map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
@@ -117,7 +123,7 @@ function initializeMap() {
     //map.controls[google.maps.ControlPosition.LEFT_TOP].push(input);
 
     var controlPanelContainer = document.createElement('div');
-    controlPanelContainer.className = 'controlpanelContainer';
+    controlPanelContainer.className = 'controlpanelContainer open';
     controlPanelContainer.appendChild(input);
     var controlPanelDiv = document.createElement('div');
     controlPanelDiv.id = 'controlPanel';
@@ -136,34 +142,25 @@ function initializeMap() {
     div.index = 2;
     map.controls[google.maps.ControlPosition.LEFT_TOP].push(div);
 
-    var div = document.createElement('div');
-    div.className = 'geolocation';
-    div.innerHTML = '<img src="images/geolocation.png" width="24px">';
-    $(div).click(
-            function() {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    var pos = new google.maps.LatLng(position.coords.latitude,
-                            position.coords.longitude);
-                    map.panTo(pos);
-                    map.setZoom(14);
-                    setOnclickMarker(pos);
-                });
-
-            });
-    
-    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(div);
-
-    
-    var div = document.createElement('div');
-    div.className = 'measurement';
-    div.innerHTML = '<img src="images/measurement.png" width="24px">';
-    $(div).click(
-            function() {
-                addruler();
-
-            });
-    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(div);
-    
+    if (!embedded) {
+	    var div = document.createElement('div');
+	    div.className = 'geolocation';
+	    div.innerHTML = '<img src="images/geolocation.png" title="Min posisjon" width="24px">';
+	    $(div).click(getMyPosition);
+	    
+	    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(div);
+	
+	    
+	    var div = document.createElement('div');
+	    div.className = 'measurement';
+	    div.innerHTML = '<img src="images/measurement.png" title="Mål distanse" width="24px">';
+	    $(div).click(
+	            function() {
+	                addruler();
+	
+	            });
+	    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(div);
+    }    
     
     var norgeskartBounds = new google.maps.LatLngBounds(new google.maps.LatLng(
             57.5, 3), new google.maps.LatLng(71, 31.5));
@@ -226,27 +223,11 @@ function initializeMap() {
         }
     });
 
-    function setOnclickMarker(latLng) {
-        if (!marker) {
-            marker = new google.maps.Marker({
-                map : map,
-                draggable : false,
-                position : latLng
-            });
-        } else {
-            marker.setPosition(latLng);
-        }
-        google.maps.event.addListener(marker, 'click', function() {
-            onClickMap(marker.getPosition())
-        });
-
-    }
-
     var markers = [];
     google.maps.event.addListener(map, 'bounds_changed', function() {
         var bounds = map.getBounds();
         searchBox.setBounds(bounds);
-        location.href = location.pathname + "#" + map.getZoom() + ',' + map.getCenter().toUrlValue();
+        //location.href = location.pathname + "#" + map.getZoom() + ',' + map.getCenter().toUrlValue();
     });
     google.maps.event.addListener(searchBox, 'places_changed', function() {
         var places = searchBox.getPlaces();
@@ -299,5 +280,20 @@ function initializeMap() {
         map.fitBounds(bounds);
 
     });
-
+    var initpos = center;
+    setOnclickMarker(initpos);
+    onClickMap(initpos, null, true);
+    
+    window.addEventListener('popstate', function(event) {
+    	console.log('d', event);
+    	var pos;
+    	if (!event.state) {
+    		pos = initpos;
+    	} else {
+    		pos = new google.maps.LatLng(event.state.lat, event.state.lng);
+    	}
+    	setOnclickMarker(pos);
+        onClickMap(pos, null, true);
+    });
 }
+

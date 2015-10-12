@@ -1,4 +1,6 @@
-function onClickMap(clickedLocation, inName) {
+function onClickMap(clickedLocation, inName, skiphistory) {
+	//location.href = location.pathname + "#" + map.getZoom() + ',' + clickedLocation.toUrlValue();
+	
 	  // https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gsradius=10000&gscoord=61.08485672110025%7C8.360595703125
 	$.get('php/fetch.php?type=yr_position&lat='+ clickedLocation.lat() + '&lon=' +clickedLocation.lng() , function(response) {
 		var loc = $($.parseXML( response )).find('location').first();
@@ -11,6 +13,9 @@ function onClickMap(clickedLocation, inName) {
 			header = inName + '<span id="elevation"></span>';
 		} else {
 			header = name + '<span id="elevation"></span><div class="position">' + distance + ' m fra ' + clickedLocation.toString() + '</div>' ;
+		}
+		if (!(skiphistory === true)) { 
+			history.pushState({'lat': clickedLocation.lat(), lng: clickedLocation.lng()},'Toppturkart: ' +  name, location.pathname + "#" + map.getZoom() + ',' + clickedLocation.toUrlValue());
 		}
 		
         var minihtml = '<div class="smallcontainer"><div style="float:left"><h3>' + header + '</h3><div id="yr"></div><div id="varsom"></div></div>' + addSmallSnoInfo(clickedLocation) + '<div class="smallgallery"><div class="flexslider"><ul class="slides"></ul></div></div></div>';
@@ -264,7 +269,7 @@ function addLargeContainer(clickedLocation, path, name) {
     
     html += '</div>';
     html += '</div>'
-    addTwitter( name);
+    //addTwitter( name);
     return html;
 }
 
@@ -655,7 +660,7 @@ function activateLayer(layerId) {
     	                          content += '<p>' + item.shortDescription + '</p>';
     	                          content += '<figure><div style="width:300px" id="elevation_chart"></div>';
     	                          content += '<figcaption>'  +msg + ' </figcaption></figure>';
-    	                          content += '<p>Se detaljer på <a style="color:black" target="_blank" href="http://randopedia.net/#!/tours/'+ item.id  +'">randopedia.net</a></p>';
+    	                          content += '<p>Se detaljer på <a style="color:black" target="_blank" href="http://randopedia.net/tours/'+ item.id  +'">randopedia.net</a></p>';
     	                          
     	                          var coordInfoWindow = new google.maps.InfoWindow();
     	                          coordInfoWindow.setContent(content);
@@ -904,6 +909,38 @@ function addPoly(polyline, results, iconpath) {
           strokeWeight: strokeWeight
       });
     return Math.round(dist) +  'm, Høydeforskjell: ' + Math.round(elevation) + 'm, ' + Math.round(deg) + ' &#176; helning, maks: ' + Math.round(maxsteep)+'&#176;';
+}
+
+function getMyPosition() {
+    navigator.geolocation.getCurrentPosition(function(position) {
+    	showMyPosition(position.coords.latitude,
+                position.coords.longitude);
+    });
+
+}
+function showMyPosition(lat, lng) {
+	var pos = new google.maps.LatLng(lat,
+            lng);
+    map.panTo(pos);
+    map.setZoom(14);
+    setOnclickMarker(pos);
+    onClickMap(pos);
+}
+
+function setOnclickMarker(latLng) {
+    if (!marker) {
+        marker = new google.maps.Marker({
+            map : map,
+            draggable : false,
+            position : latLng
+        });
+    } else {
+        marker.setPosition(latLng);
+    }
+    google.maps.event.addListener(marker, 'click', function() {
+        onClickMap(marker.getPosition())
+    });
+
 }
 
 function findLengthInPixel(latlng1, latlng2) {
