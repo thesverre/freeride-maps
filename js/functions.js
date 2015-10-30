@@ -1,5 +1,4 @@
 function onClickMap(clickedLocation, inName, skiphistory) {
-	//location.href = location.pathname + "#" + map.getZoom() + ',' + clickedLocation.toUrlValue();
 	
 	  // https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gsradius=10000&gscoord=61.08485672110025%7C8.360595703125
 	$.get('php/fetch.php?type=yr_position&lat='+ clickedLocation.lat() + '&lon=' +clickedLocation.lng() , function(response) {
@@ -38,19 +37,9 @@ function onClickMap(clickedLocation, inName, skiphistory) {
 		}
         
         $.get('http://api.webcams.travel/rest?method=wct.webcams.list_nearby&devid=92b442ab55694e87848d5e379a14011e&format=json&lat=' + clickedLocation.lat() + '&lng='+ clickedLocation.lng(), function(result) {
-	    $('#largegallery').empty().append('<div id="slider" class="flexslider"><ul class="slides"></ul></div><div id="carousel" class="flexslider"><ul class="slides"></ul></div>');
-	    
-	       var ind = 0;
-            result.webcams.webcam.forEach(function(webcam) {
-                var li = '<li><a onclick="openLargeGallery(' + (ind++)+')" ><img src="' + webcam.daylight_thumbnail_url + '"></a></li>';
-                var m= '<li>';
-                m += '<figure><a target="_blank" href="' + webcam.timelapse.link_day +'"><img src="' + webcam.preview_url + '"><figcaption>' + webcam.title + '</figcaption></a></figure>';
-                m += '</li>';
-                $('#slider .slides').append($(m));
-            	$('#carousel .slides').append($('<li><img src="' + webcam.daylight_thumbnail_url + '"></li>'));
-                $('.smallgallery .slides').append($(li));
-                
-            });
+        	$('#largegallery').empty().append('<div id="slider" class="flexslider"><ul class="slides"></ul></div><div id="carousel" class="flexslider"><ul class="slides"></ul></div>');
+        	instagramGallery = '';
+        	var ind = addWebCams(result);
             if (!instagram_token) {
             	$('.smallgallery .slides').append($('<li>Se flere bilder?<br><a onclick="signinInstagram()"><img style="height:20px" src="images/Instagram_signin.png"</a></li>'));
             }
@@ -65,6 +54,24 @@ function onClickMap(clickedLocation, inName, skiphistory) {
 
 	
   });
+}
+
+function addWebCams(result) {
+	var ind = 0;
+	instagramGallery += '<div>';
+    result.webcams.webcam.forEach(function(webcam) {
+        var li = '<li><a onclick="openLargeGallery(' + (ind)+')" ><img src="' + webcam.daylight_thumbnail_url + '"></a></li>';
+        var m= '<li>';
+        m += '<figure><a target="_blank" href="' + webcam.timelapse.link_day +'"><img src="' + webcam.preview_url + '"><figcaption>' + webcam.title + '</figcaption></a></figure>';
+        m += '</li>';
+        instagramGallery +='<a target="_blank" onclick="openLargeGallery(' + (ind)+')"><img width="150" title="'+ webcam.title + '" src="' + webcam.preview_url + '"></a>';
+        ind++;
+        $('#slider .slides').append($(m));
+    	$('#carousel .slides').append($('<li><img src="' + webcam.daylight_thumbnail_url + '"></li>'));
+        $('.smallgallery .slides').append($(li));
+    });
+    instagramGallery += '</div>';
+    return ind;
 }
 
 function getElevation(latLng) {
@@ -85,8 +92,10 @@ function getElevation(latLng) {
 }
 var instagramGallery = '';
 function addInstagram(clickedLocation, ind) {
-	instagramGallery = '';
 	if (!instagram_token) {
+		if (!instagram_token) {
+			instagramGallery += '<br><a onclick="signinInstagram()"><img style="height:20px" src="images/Instagram_signin.png"</a>';
+        }
 		return;
 	}
 	

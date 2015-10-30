@@ -1,5 +1,3 @@
-/// gdal_translate -of Gtiff -co "tfw=yes" -a_ullr -112565.38795656362 6685298.020140334 687434.6120434364 7285298.020140334  -a_srs "+proj=utm +zone=33 +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "wms.toporaster3.png" "input_tfw.tiff"
-
 
 proj4.defs('EPSG:32633','+proj=utm +zone=33 +ellps=WGS84 +datum=WGS84 +units=m +no_defs');
 proj4.defs('EPSG:3857', '+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +a=6378137 +b=6378137 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
@@ -54,6 +52,7 @@ function initializeMap() {
     };
     map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
     
+    
     elevator = new google.maps.ElevationService();
 
     function createMapType(inType, layer, name) {
@@ -73,6 +72,7 @@ function initializeMap() {
                             }
                         }
                         if (type == 'sk') {
+                        	return 'temp/' + zoom + '/' + coord.x  + '/' +  coord.y + '.png'; 
                             return 'http://opencache.statkart.no/gatekeeper/gk/gk.open_gmaps?layers='
                                     + l
                                     + '&zoom='
@@ -199,8 +199,8 @@ function initializeMap() {
         if (!loaded) {
             if (document.getElementById('map-canvas').offsetWidth > 1200) {
                 showLayer();
-                activateLayer('randopedia');
             }
+            activateLayer('randopedia');
             loaded = true;
         }
     });

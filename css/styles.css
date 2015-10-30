@@ -588,7 +588,7 @@ h3 {
 }
 
 #largegallery {
-	width:600px;
+	width:90%;
 	height: 400px;
 }
 
@@ -605,6 +605,9 @@ h2 {
 @media only screen and (max-width: 600px) {
  .smallsnocontainer {
    visibility: hidden;
+ }
+ #largegallery {
+	  width:90%;
  }
 }
 
