@@ -172,51 +172,76 @@ li {
 .smallgallery .flex-direction-nav a:before{
 	color:rgba(255, 255, 255, 0.8);
 }
-
 #pac-input {
         background-color: #fff;
         font-family: Roboto;
         font-size: 15px;
         font-weight: 300;
-        margin-top: 12px;
         margin-left: 12px;
-        padding: 0 11px 0 13px;
+        padding: 8px 8px 8px 36px;
         text-overflow: ellipsis;
-        width: 400px;
+        width: 272px;
       }
+
+.menu {
+    content: '';
+    display: block;
+    background-image: url(../images/menu.png);
+    background-size: 48px 24px;
+    background-position: 0 0;
+    height: 24px;
+    width: 24px;
+    opacity: .62;
+    position: absolute;
+    cursor:pointer;
+    top:8px;
+    left: 20px;
+}
 
 #pac-input:focus {
 border: 1 px solid #4d90fe;
 
 }
+.controlpanelContainer {
+	z-index:11;
+	position: absolute;
+    top: 12px;
+    left: 0;
+}
 
-@keyframes controlpanelopen {
-    0%   {margin-top: 12px}
-    100% {margin-top: 100px}
+@keyframes controlpanel-open {
+    0%   {transform: translateX(-100%)}
+    100% {transform: translateX(0%)}
 }
-@keyframes controlpanelclose {
-    0%   {margin-top: 100px}
-    100% {margin-top: 12px}
+@keyframes controlpanel-close {
+    0%   {transform: translateX(0%)}
+    100% {transform: translateX(-100%)}
 }
-.controlpanelContainer.open {
-	margin-top: 100px;
-	animation-name: controlpanelopen;
-    animation-duration: 1s;
+
+.controlpanel.open {
+	animation-name: controlpanel-open;
+   animation-duration: 0.5s;
+ 
 }
-.controlpanelContainer.close {
-	margin-top: 12px;
-	animation-name: controlpanelclose;
-    animation-duration: 1s;
+.controlpanel.close {
+	animation-name: controlpanel-close;
+   animation-duration: 0.5s;
+   transform: translateX(-100%)
 }
 
 .controlpanel {
-	margin: 12px;
-	background-color: #fff;
-	border: 2px solid #fff;
-	padding-left: 10px;
-	width: 200px;
-	border-radius: '3px';
-	box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+    background-color: rgbA(255,255, 255, 0.9);
+    border: 2px solid #fff;
+    padding-left: 10px;
+    width: 300px;
+    heigth: 100%;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, .3);
+    position: absolute;
+    top: 0px;
+    left: 0;
+    padding-top: 70px;
+    height: 100%;
+    z-index: 10;
 }
 
 .imagediv {
@@ -234,7 +259,7 @@ border: 1 px solid #4d90fe;
 	right: 0px;
 	opacity: 0.5;
 	animation-name: layer;
-    animation-duration: 4s;
+    animation-duration: 2s;
 }
 
 #contentInfo {
@@ -265,15 +290,11 @@ border: 1 px solid #4d90fe;
   cursor: pointer;
 }
 .largecontainer {
-	position: absolute;
-	left: 50%;
-	width:1024px;
-	margin-left: -512px;
-	margin-bottom: 20px;
+	margin-left: 12px;
 	height: 100%;
 }
-.snocontainer {
- width:1024px;
+.half .largecontainer {
+	margin-left: 312px;
 }
 .graphcontainer figure {
  margin-top:20px;
@@ -289,17 +310,13 @@ border: 1 px solid #4d90fe;
  .graphcontainer figure {
  margin-top:20px;
 }
-.graphcontainer .chart{
-	 width: 1012px;
-	 height: 420px;
-}
 
 
 .chart {
 float:left;
-width:500px;
-height: 372px;
-margin: 6px;
+margin: 12px;
+height: 362px;
+width: 512px;
 
 }
 .chart .imgcontainter {
@@ -334,9 +351,7 @@ font-weight: bold;
   box-shadow: 0px 0px 3px rgba(0, 0, 0, .8);
 }
 
-.controlpanel {
-	display:none;
-}
+
 .controlpanelicon {
 	cursor:pointer;
 }
@@ -367,17 +382,45 @@ body {
 
 
 
+@keyframes overlayfull {
+    0%   {opacity: 0;}
+    100% {opacity: 1;}
+}
+@keyframes overlayhalf {
+    0%   {opacity: 0;}
+    100% {opacity: 1;}
+}
 
+.overlaydummy {
+	float: left;
+}
+.full .overlaydummy {
+	width:0px;
+}
+.half .overlaydummy {
+	width:300px;
+}
+.full .smallcontainer {
+	animation-name: overlayfull;
+    animation-duration: 2s;
+}
+.half .smallcontainer {
+	animation-name: overlayhalf;
+    animation-duration: 2s;
+}
 
-/* Overlay style */
+.snocontainer {
+	max-width: 1200px;
+}
+
 .overlay {
     position: fixed;
     width: 100%;
     height: 112px;
     overflow: none;
-    top: 0;
+    bottom: 0;
     left: 0;
-    background: rgba(153,204,51,0.9);
+    background: rgba(93,23,23,0.9);
     color: white;
     
 }
@@ -399,7 +442,6 @@ body {
 }
 
 .overlay-collapse {
-    height: 112px;
     animation-name: collapse;
     animation-duration: 0.5s;
 }
@@ -421,13 +463,12 @@ body {
 }
 
 .overlay-more:hover, .overlay-close:hover, .overlay-less:hover {
-	background-color: rgba(163,224,61,0.9);
+	background-color: rgba(93,23,23,0.5);
 	transition: background-color 0.5s;
 	
 }
 .overlay-less{
-	width: 60px;
-    height: 30px;
+	height: 30px;
     position: absolute;
     left: 50%;
     margin-left: -30px;
@@ -436,14 +477,14 @@ body {
     border: 1px solid transparent;
     box-sizing: border-box;
     border-radius: 5px;
-    background: url(../images/arrow-up.png) no-repeat center center;
-    text-indent: 200%;
-    color: transparent;
+    background: transparent;
+    text-decoration: underline;
+    /* text-indent: 200%; */
+    color: white;
     outline: none;
     z-index: 100;
 }
 .overlay-more {
-    width: 60px;
     height: 30px;
     position: absolute;
     left: 50%;
@@ -453,9 +494,10 @@ body {
     border: 1px solid transparent;
     box-sizing: border-box;
     border-radius: 5px;
-    background: url(../images/arrow-down.png) no-repeat center center;
-    text-indent: 200%;
-    color: transparent;
+    background: transparent;
+    text-decoration: underline;
+    /* text-indent: 200%; */
+    color: white;
     outline: none;
     z-index: 100;
     
@@ -469,23 +511,18 @@ html, body {
 
 
 .overlay-contentpush {
-    -background: rgba(56, 4, 4, 1);
-    background: rgba(153,204,51,0.9);
+	box-shadow: 0px -3px 6px rgba(0,0,0,0.15);
+    border-top: 2px solid rgba(94,39,80,0.9);
+    background: rgba(94,39,80,0.9);
     visibility: hidden;
-    -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-    -webkit-transform: translateY(-100%);
-    transform: translateY(-100%);
-    -webkit-transition: -webkit-transform 0.5s, visibility 0s 0.5s;
+    transform: translateY(100%);
     transition: transform 0.5s, visibility 0s 0.5s;
-    box-shadow: 0 10px 6px -6px #777;
 }
 
 .overlay-contentpush.open {
     visibility: visible;
-    -webkit-transform: translateY(0%);
     transform: translateY(0%);
-    -webkit-transition: -webkit-transform 0.5s;
     transition: transform 0.5s;
 }
 
@@ -539,10 +576,7 @@ h3 {
 	   height: 100%;
 	   overflow: auto !important;
 	}
-	#largegallery {
-	  width:600px;
-	  height: 400px;
-	}
+	
 	#slider figure {
 	  width:auto;
 	  height: 300px;
@@ -557,25 +591,30 @@ h3 {
        overflow: auto !important;
 }
 
-
 @media only screen and (max-width: 1000px) {
 	.smallgallery {
-	display:none;
+	 display:none;
   }
 }
 
-@media only screen and (max-width: 800px) {
+@media only screen and (max-width: 1600px) {
+  .half .smallgallery {
+	 display:none;
+  }
+}
+
+@media only screen and (max-width: 900px) {
 .overlay-expanded {
 	overflow: auto !important;
 	height: 100%;
 }
-.largecontainer {
-	position: absolute;
-	left: 0px;
-	width:90%;
-	margin-left: 0px;
+.overlay.half {
+ 	display:none;
+ }
+.half .smallsnocontainer {
+   visibility: hidden;
 }
-
+ 
 .snocontainer {
  width:100%;
  
@@ -587,15 +626,11 @@ h3 {
 	 width: 90%;
 }
 
-#largegallery {
-	width:90%;
-	height: 400px;
-}
 
 .chart {
 float:left;
 width:100%;
-
+height:auto;
 }
 h2 {
 	width: 70%;
@@ -609,5 +644,6 @@ h2 {
  #largegallery {
 	  width:90%;
  }
+ 
 }
 

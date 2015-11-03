@@ -51,12 +51,15 @@
 </head>
 <body>
 	<input id="pac-input" class="controls" type="text" placeholder="Søk">
+	<div class="controlpanel"></div>
 	<div class="container" id="map-canvas"></div>
-	<div class="overlay overlay-contentpush">
-		<button type="button" class="overlay-more">Mer</button>
+	
+	<div class="overlay overlay-contentpush overlay-collapse">
+		<button type="button" class="overlay-more">Mer informasjon</button>
 		<button type="button" class="overlay-close">Close</button>
-		<div id="overlaycontent"></div>
+		<div id="overlaycontent" ></div>
 	</div>
+	
 	<div id="zoomcontainer"></div>
 	<div id="largegallery" class="modal"></div>
 </body>

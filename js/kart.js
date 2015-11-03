@@ -26,13 +26,11 @@ function initializeMap() {
         if (a.length == 3) {
             zoom = parseInt(a[0]);
             center = new google.maps.LatLng(parseFloat(a[1]), parseFloat(a[2]));
-            console.log('c', center);
         }
         
 
     }
     geocoder = new google.maps.Geocoder();
-    var smallwidth = $( document ).width() < 600;
     var mapOptions = {
         zoom : zoom,
         center : center,
@@ -43,11 +41,11 @@ function initializeMap() {
         mapTypeId : 'mix',
         mapTypeControl : true,
         mapTypeControlOptions : {
-        	position: smallwidth ? google.maps.ControlPosition.RIGHT_TOP : google.maps.ControlPosition.BOTTOM_LEFT,
+        	position: google.maps.ControlPosition.RIGHT_TOP,
             mapTypeIds : [ 'mix', google.maps.MapTypeId.TERRAIN,
                     'statkart_topo2', 'statkart_raster', 'ut', 'eniro_aerial',
                     google.maps.MapTypeId.HYBRID ],
-            style : smallwidth ? google.maps.MapTypeControlStyle.DROPDOWN_MENU : google.maps.MapTypeControlStyle.HORIZONTAL
+            style : google.maps.MapTypeControlStyle.DROPDOWN_MENU 
         }
     };
     map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
@@ -72,7 +70,6 @@ function initializeMap() {
                             }
                         }
                         if (type == 'sk') {
-                        	return 'temp/' + zoom + '/' + coord.x  + '/' +  coord.y + '.png'; 
                             return 'http://opencache.statkart.no/gatekeeper/gk/gk.open_gmaps?layers='
                                     + l
                                     + '&zoom='
@@ -124,18 +121,19 @@ function initializeMap() {
 
     var controlPanelContainer = document.createElement('div');
     controlPanelContainer.className = 'controlpanelContainer open';
+    var menu = document.createElement('div');
+    menu.className = 'menu';
+    menu.addEventListener("click", toggleLayer);
+    controlPanelContainer.appendChild(menu);
     controlPanelContainer.appendChild(input);
-    var controlPanelDiv = document.createElement('div');
-    controlPanelDiv.id = 'controlPanel';
+    
+    var controlPanelDiv = $('.controlpanel').get(0);
+    var smallscreen = $( document ).width() < 800;
+    $('.controlpanel').addClass(smallscreen ? 'close' : 'open');
+    $('.overlay').addClass(smallscreen ? 'full' : 'half');
     var controlPanel = new ControlPanel(controlPanelDiv, map);
-    controlPanelContainer.appendChild(controlPanelDiv);
-    var d = document.createElement('div')
-    d.innerHTML = '<img onclick="showLayer()" style="margin-left: 12px" src ="images/layers_2.png" width="24px">';
-    d.className = 'controlpanelicon';
-    controlPanelContainer.appendChild(d);
-    controlPanelContainer.index = 3;
-    map.controls[google.maps.ControlPosition.LEFT_TOP]
-            .push(controlPanelContainer);
+    
+    $("body").append(controlPanelContainer);
 
     var div = document.createElement('div');
     div.id = 'contentInfo';
@@ -148,7 +146,7 @@ function initializeMap() {
 	    div.innerHTML = '<img src="images/geolocation.png" title="Min posisjon" width="24px">';
 	    $(div).click(getMyPosition);
 	    
-	    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(div);
+	    map.controls[google.maps.ControlPosition.RIGHT_TOP].push(div);
 	
 	    
 	    var div = document.createElement('div');
@@ -159,7 +157,7 @@ function initializeMap() {
 	                addruler();
 	
 	            });
-	    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(div);
+	    map.controls[google.maps.ControlPosition.RIGHT_TOP].push(div);
     }    
     
     var norgeskartBounds = new google.maps.LatLngBounds(new google.maps.LatLng(
@@ -197,9 +195,6 @@ function initializeMap() {
     var loaded = false;
     google.maps.event.addListener(map, 'tilesloaded', function(event) {
         if (!loaded) {
-            if (document.getElementById('map-canvas').offsetWidth > 1200) {
-                showLayer();
-            }
             activateLayer('randopedia');
             loaded = true;
         }
@@ -208,14 +203,17 @@ function initializeMap() {
     var moreBttn = $('.overlay-more');
     moreBttn.click(function() {
         if ($('.overlay').hasClass('overlay-expanded')) {
-            $(this).removeClass('overlay-less').addClass('overlay-more');
+            $(this).removeClass('overlay-less').addClass('overlay-more').html('Mer informasjon');
             $('.overlay').removeClass('overlay-expanded');
             $('.overlay').addClass('overlay-collapse');
             $('.largecontainer').fadeOut();
+            $('.controlpanelContainer').fadeIn();
         } else {
-            $(this).addClass('overlay-less').removeClass('overlay-more');
-            $('.overlay').removeClass('overlay-collapse').addClass(
-                    'overlay-expanded');
+            $(this).addClass('overlay-less').removeClass('overlay-more').html('Skjul informasjon');
+            $('.overlay').removeClass('overlay-collapse').addClass('overlay-expanded');
+            if ($('.controlpanel').hasClass('close')) {
+            	$('.controlpanelContainer').fadeOut();
+        	}
             var data = $('.largecontainer').data('data');
             var html = addLargeContainer(data[0], data[1], data[2]);
             $('.largecontainer').html(html).fadeIn();

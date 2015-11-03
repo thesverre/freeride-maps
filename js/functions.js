@@ -17,7 +17,7 @@ function onClickMap(clickedLocation, inName, skiphistory) {
 			history.pushState({'lat': clickedLocation.lat(), lng: clickedLocation.lng()},'Toppturkart: ' +  name, location.pathname + "#" + map.getZoom() + ',' + clickedLocation.toUrlValue());
 		}
 		
-        var minihtml = '<div class="smallcontainer"><div style="float:left"><h3>' + header + '</h3><div id="yr"></div><div id="varsom"></div></div>' + addSmallSnoInfo(clickedLocation) + '<div class="smallgallery"><div class="flexslider"><ul class="slides"></ul></div></div></div>';
+        var minihtml = '<div class="smallcontainer"><div class="overlaydummy">&nbsp;</div><div style="float:left"><h3>' + header + '</h3><div id="yr"></div><div id="varsom"></div></div>' + addSmallSnoInfo(clickedLocation) + '<div class="smallgallery"><div class="flexslider"><ul class="slides"></ul></div></div></div>';
         addVarsom(clickedLocation);
         addYr(path, name);
         getElevation(clickedLocation);
@@ -502,23 +502,26 @@ function getBbox(epsg, latSw, latNe) {
 
 function closeLayer() {
   $('.controlpanel').hide();
-  $('.controlpanelicon').show();
+}
+function toggleLayer() {
+	if ($('.controlpanel').hasClass('open')) {
+		$('.controlpanel').removeClass('open').addClass('close');
+		$('.overlay').addClass('full').removeClass('half');
+	} else {
+		$('.controlpanel').addClass('open').removeClass('close')
+		$('.overlay').removeClass('full').addClass('half');
+	}
 }
 function showLayer() {
 	$('.controlpanel').show();
-	$('.controlpanelicon').hide();
+	
 }
-function ControlPanel(controlDiv, map) {
+function ControlPanel(controlUI, map) {
 
   // Set CSS for the control border
-  var controlUI = document.createElement('div');
- controlUI.className='controlpanel';
- controlDiv.appendChild(controlUI);
 
-  var closeButton = '<div onclick="closeLayer()" class="close-button">X</div>';
-  var c = document.createElement('div');
-  c.innerHTML = closeButton;
-  controlUI.appendChild(c);
+
+  
   var header = document.createElement('h2');
   header.innerHTML = "Data";
   //controlUI.appendChild(header);
@@ -734,6 +737,8 @@ function preZero(d) {
 
 
 function toggleOverlay() {
+	$('.controlpanelContainer').fadeIn();
+	
 	if ($('#overlaycontent').hasClass( 'open' )) {
 		$('.zoom figure').addClass('zoom-close');
 		$('.overlay-less').show();
@@ -743,6 +748,8 @@ function toggleOverlay() {
 		$('#overlaycontent').removeClass('open').fadeIn();
 		return;
 	}
+	$('.overlay').removeClass('overlay-expanded').addClass('overlay-collapse')
+	$('.overlay-less').removeClass('overlay-less').addClass('overlay-more').html('Mer informasjon');;
     var transEndEventName = 'transitionend';
     if( $('.overlay').hasClass( 'open' ) ) {
         $('.overlay').removeClass( 'open' );
