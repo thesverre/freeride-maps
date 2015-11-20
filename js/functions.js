@@ -278,7 +278,7 @@ function addLargeContainer(clickedLocation, path, name) {
     
     html += '</div>';
     html += '</div>'
-    //addTwitter( name);
+    addTwitter( name);
     return html;
 }
 
@@ -517,30 +517,128 @@ function showLayer() {
 	
 }
 function ControlPanel(controlUI, map) {
-
-  // Set CSS for the control border
-
-
+  var div = document.createElement('h2');
+  div.innerHTML = '<div  class="select-style"><select onchange="changeSnowData(this)">' +
+	  '<option value="sdfsw">Nysnø siste 3 dager</option>' +
+	  '<option value="sdfsw+">Nysnø neste 3 dager</option>' +
+  	  '<option value="sd">Snødybde</option>' +
+  	  '<option value="lwc">Snøtilstand</option>' +
+  	  '<option value="layer">Overlagskart</option>' +
+  	  '</select></div>'
+  controlUI.appendChild(div);
+  var div = document.createElement('div');
+  addNewSnowData(div, 'sdfsw');
+  controlUI.appendChild(div);
   
-  var header = document.createElement('h2');
-  header.innerHTML = "Data";
-  //controlUI.appendChild(header);
-
-
-  // Set CSS for the control interior
-  var ui = document.createElement('ul');
-  ui.appendChild(addLayer('clouds_precipitation_regional', 'Skyer')); 
-  ui.appendChild(addLayer('radar_precipitation_intensity', 'Radar')); 
-  ui.appendChild(addLayer('temperature_2m_regional', 'Temperatur')); 
-  ui.appendChild(addLayer('wind_10m_regional', 'Vind')); 
-  ui.appendChild(addLayer('snodybde', 'Snødybde')); 
-  ui.appendChild(addLayer('bratthet', 'Bratthet'));
-  ui.appendChild(addLayer('skog', 'Under skoggrense'));
-  ui.appendChild(addLayer('webcam', 'Webkamera'));
-  ui.appendChild(addLayer('none', 'Ingen')); 
-  controlUI.appendChild(ui);
+  
+}
+function changeSnowData(obj) {
+	var val =  $(obj).find(':selected').val();
+	console.log('sel', val);
+	var div = $('.snowmapcontainer').get(0);
+	div.innerHTML = ''
+	if (val == 'layer') {
+		addLayerMenu(div);
+	} else {
+		addNewSnowData(div, val);
+	}
+}
+function addLayerMenu(div) {
+	var ui = document.createElement('ul');
+	  ui.appendChild(addLayer('clouds_precipitation_regional', 'Skyer')); 
+	  ui.appendChild(addLayer('radar_precipitation_intensity', 'Radar')); 
+	  ui.appendChild(addLayer('temperature_2m_regional', 'Temperatur')); 
+	  ui.appendChild(addLayer('wind_10m_regional', 'Vind')); 
+	  ui.appendChild(addLayer('snodybde', 'Snødybde')); 
+	  ui.appendChild(addLayer('bratthet', 'Bratthet'));
+	  ui.appendChild(addLayer('skog', 'Under skoggrense'));
+	  ui.appendChild(addLayer('webcam', 'Webkamera'));
+	  ui.appendChild(addLayer('none', 'Ingen'));
+	  div.appendChild(ui);
 }
 
+function addNewSnowData(div, type) {
+	;
+    div.className ='snowmapcontainer';
+    var a= document.createElement('a');
+    var img = document.createElement('img');
+    var layer = type;
+    if (type == 'sdfsw+') {
+    	layer = 'sdfsw';
+    }
+    var today = toDateStringISO(new Date());
+    img.src = 'http://gridwms.nve.no/WMS_server/wms_server.aspx?time=' + today +'&custRefresh=0.1345073445700109&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&STYLES=&VERSION=1.1.1&LAYERS='+layer+'&SRS=EPSG:32633&BBOX=-660658.2039680962,6340571.336718777,1472673.796031904,7940571.336718777&WIDTH=280&HEIGHT=300';
+    img.className ='snowmap';
+    a.addEventListener("click", function() {
+    	var str = '<div><img width=100% height=100% src="http://gridwms.nve.no/WMS_server/wms_server.aspx?time=' + today +'&custRefresh=0.0345173445700109&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&STYLES=&VERSION=1.1.1&LAYERS='+layer+'&SRS=EPSG:32633&BBOX=-660658.2039680962,6340571.336718777,1472673.796031904,7940571.336718776&WIDTH=800&HEIGHT=800"></div>'
+    	$('#largegallery').html(str).modal();
+    });
+    a.appendChild(img);
+    div.appendChild(a);
+    var ui = document.createElement('ul');
+    ui.className="tours";
+	ui.appendChild(addNewSnow(type, 'gaustatoppen', 'Gaustatoppen (Rjukan)', [59.85537672933007, 8.661346435546875]));
+	ui.appendChild(addNewSnow(type, 'nibbi', 'Nibbi (Hemsedal)', [60.877300456431975, 8.65997314453125]));
+	ui.appendChild(addNewSnow(type, 'roldal', 'Røldalsfjellet (Røldal)', [59.832567517555724, 6.732387542724609]));
+	ui.appendChild(addNewSnow(type, 'myrkdalen', 'Myrkdalen (Voss)', [60.86622890133701, 6.47146224975585]));
+	ui.appendChild(addNewSnow(type, 'ringstind', 'Store ringstind (Hurrungane)', [61.443199007809355, 7.815399169921875]));
+	ui.appendChild(addNewSnow(type, 'rasletind', 'Rasletind (Valdresflya)', [61.38891065181892, 8.740482330322266]));
+	ui.appendChild(addNewSnow(type, 'litjskjorta', 'Litjskjorta (Øksendalen)', [62.64307937164752, 8.26171875]));
+	ui.appendChild(addNewSnow(type, 'kirketaket', 'Kirketaket (Romsdalen)', [62.60203134523976, 7.909126281738281]));
+	ui.appendChild(addNewSnow(type, 'randerstopp', 'Randers topp (Sunnmøre)', [62.3129392747234, 6.362754054995776]));
+	ui.appendChild(addNewSnow(type, 'daltind', 'Daltind (Lyngen)', [69.43573704066236, 20.04558563232422]));
+	ui.appendChild(addNewSnow(type, 'bukollen', 'Bukollen (Østlandet)', [60.14953730117743, 10.812950134277344]));
+	ui.appendChild(addNewSnow(type, 'heimdsalhaugen', 'Heimdalshaugen (Grong)', [64.59355070503187, 12.70294189453125]));
+	div.appendChild(ui);
+	
+	
+	
+}
+
+function addNewSnow(type, id, name, latLngArray) {
+	var showpre = true;
+	if (type == 'sdfsw+') {
+		type = 'sdfsw';
+		showpre = false;
+	}
+	var latLng = new google.maps.LatLng(latLngArray[0], latLngArray[1]);
+	var li = document.createElement('ul');
+	li.className = 'layer';
+	
+	li.innerHTML = name + '<span class="parameter '+ id+'"></span>';
+	
+    var date = toDateStringISO(new Date());
+    var startdate = toDateStringISO(addDays(new Date(), -3));
+    var enddate = toDateStringISO(addDays(new Date(), 3));
+
+    var p = proj4(epsg32633).forward([ latLng.lng(), latLng.lat() ]);
+    var pos = p[0] + ";" + p[1];
+    var url = 'php/fetch.php?type=nve&x=' + p[0] + '&y=' + p[1] +  '&startdate=' + startdate + '&enddate=' + enddate+ '&layer=';
+
+    $.get(url + type, function(result) {
+        result = $.parseJSON(result);
+        var data;
+        if (type == 'sdfsw') {
+	        if (showpre) {
+	        	data = Math.round(result.MapGridValue[0] + result.MapGridValue[1] + result.MapGridValue[2]);
+	        } else {
+	        	data = Math.round(result.MapGridValue[3] + result.MapGridValue[4] + result.MapGridValue[5] + result.MapGridValue[6]);	
+	        }
+        } else {
+        	data = Math.round(result.MapGridValue[3]);
+        }
+        var html =  data + ' ' + result.Unit;
+        $('.layer .' + id).html(html).fadeIn();
+    });
+	
+	google.maps.event.addDomListener(li, 'click', function() {
+		map.panTo(latLng);
+	    map.setZoom(13);
+	    setOnclickMarker(latLng);
+		onClickMap(latLng, name, false);
+	});
+	return li;
+}
 function addLayer(layerId, name, active ) {
 	var li = document.createElement('ul');
 	li.className = 'layer ' + layerId;

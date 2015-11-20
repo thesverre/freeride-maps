@@ -3,6 +3,42 @@ html, body, #map-canvas {
 	margin: 0px;
 	padding: 0px
 }
+
+.select-style {
+    font-weight: bold;
+    padding: 0;
+    margin: 0;
+    /* width: 120px; */
+    border-radius: 3px;
+    overflow: hidden;
+    /* background-color: #fff; */
+    background: url("http://www.scottgood.com/jsg/blog.nsf/images/arrowdown.gif") no-repeat 90% 50%;
+}
+
+.select-style select {
+	font: inherit;
+    padding: 0px;
+    width: 100%;
+    color: inherit;
+    border: none;
+    box-shadow: none;
+    background-color: transparent;
+    background-image: none;
+    -webkit-appearance: none;
+       -moz-appearance: none;
+            appearance: none;
+}
+
+.select-style select:focus {
+    outline: none;
+}
+.snowmap {
+	
+}
+.snowmapcontainer {
+	
+}
+
 #twitter {
 	margin-top: 50px;
 }
@@ -67,7 +103,11 @@ ul {
 li {
 	list-style-type: none;
 }
-
+h2 {
+	margin:12px 0px 0px 0px;
+	padding:0px;
+	font-size: 1.2em;
+}
 .label  div {
 	border: 0px;
     font-family: arial;
@@ -97,7 +137,14 @@ li {
 
 .layer {
 	padding: 2px;
+	width: 100%;
 	cursor: pointer;
+	position: relative;
+}
+.layer .parameter {
+	position:absolute;
+	right:24px;
+	top:0px;
 }
 
 #largegallery {
@@ -203,7 +250,7 @@ border: 1 px solid #4d90fe;
 
 }
 .controlpanelContainer {
-	z-index:11;
+	z-index:1;
 	position: absolute;
     top: 12px;
     left: 0;
@@ -230,7 +277,7 @@ border: 1 px solid #4d90fe;
 }
 
 .controlpanel {
-    background-color: rgbA(255,255, 255, 0.9);
+    background-color: rgbA(255,255, 255, 1);
     border: 2px solid #fff;
     padding-left: 10px;
     width: 300px;
@@ -239,9 +286,9 @@ border: 1 px solid #4d90fe;
     position: absolute;
     top: 0px;
     left: 0;
-    padding-top: 70px;
+    padding-top: 50px;
     height: 100%;
-    z-index: 10;
+    z-index: 1;
 }
 
 .imagediv {
@@ -570,19 +617,34 @@ h3 {
     margin-left: 10px;
     
 }
+@media only screen and (max-height: 1024px) {
+	#largegallery {
+	  height: 800px;
+	}
+}
 
 @media only screen and (max-height: 800px) {
 	.overlay-expanded {
 	   height: 100%;
 	   overflow: auto !important;
 	}
-	
+	#largegallery {
+	  height: 400px;
+	}
 	#slider figure {
 	  width:auto;
 	  height: 300px;
 	}
 	#carousel {
 	  display:none;
+	}
+}
+@media only screen and (max-height: 400px) {
+	#largegallery {
+	  height: 300px;
+	}
+	#slider figure {
+	  height: 150px;
 	}
 }
 
@@ -625,7 +687,9 @@ h3 {
 .graphcontainer .chart{
 	 width: 90%;
 }
-
+#largegallery {
+	width:90%;
+}
 
 .chart {
 float:left;
