@@ -12,7 +12,7 @@ html, body, #map-canvas {
     border-radius: 3px;
     overflow: hidden;
     /* background-color: #fff; */
-    background: url("http://www.scottgood.com/jsg/blog.nsf/images/arrowdown.gif") no-repeat 90% 50%;
+    background: url("../images/arrowdown.gif") no-repeat 90% 50%;
 }
 
 .select-style select {
@@ -31,6 +31,16 @@ html, body, #map-canvas {
 
 .select-style select:focus {
     outline: none;
+}
+.hidebutton {
+	background: url("../images/arrow-left.png") no-repeat 100% 50%;
+    height: 23px;
+    width: 30px;
+    opacity: 0.5;
+    position: absolute;
+    bottom: 10px;
+    left: 278px;
+    z-index: 100000;
 }
 .snowmap {
 	
@@ -147,7 +157,7 @@ h2 {
 	top:0px;
 }
 
-#largegallery {
+#largegallery, #modalimage {
 	width: 800px;
 	height: 800px;
 }
@@ -363,7 +373,6 @@ border: 1 px solid #4d90fe;
 float:left;
 margin: 12px;
 height: 362px;
-width: 512px;
 
 }
 .chart .imgcontainter {
@@ -618,7 +627,7 @@ h3 {
     
 }
 @media only screen and (max-height: 1024px) {
-	#largegallery {
+	#largegallery, #modalimage {
 	  height: 800px;
 	}
 }
@@ -628,7 +637,7 @@ h3 {
 	   height: 100%;
 	   overflow: auto !important;
 	}
-	#largegallery {
+	#largegallery, #modalimage {
 	  height: 400px;
 	}
 	#slider figure {
@@ -640,7 +649,7 @@ h3 {
 	}
 }
 @media only screen and (max-height: 400px) {
-	#largegallery {
+	#largegallery, #modalimage {
 	  height: 300px;
 	}
 	#slider figure {
@@ -687,7 +696,7 @@ h3 {
 .graphcontainer .chart{
 	 width: 90%;
 }
-#largegallery {
+#largegallery, #modalimage {
 	width:90%;
 }
 
@@ -705,7 +714,7 @@ h2 {
  .smallsnocontainer {
    visibility: hidden;
  }
- #largegallery {
+ #largegallery, #modalimage {
 	  width:90%;
  }
  

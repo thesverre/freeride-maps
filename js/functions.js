@@ -200,7 +200,7 @@ function addVarsom(latLng) {
 		var title = '';
 		if (result.AvalancheDanger) {
 			title = result.AvalancheDanger +'\n\n' + result.AvalancheWarning;
-			var html = '<a target="_blank" href="http://varsom.no/Snoskred/' + result.RegionName+ '"><img title="'+ title + '"  src="http://varsom.no/Templates/Styles/Images/AvalanceWarningLevels/' + result.DangerLevel +'_standard.png"></a>';
+			var html = '<a target="_blank" href="http://varsom.no/Snoskred/' + result.RegionName.replace('ø', 'o').replace('å', 'a').replace('æ', 'a') + '"><img title="'+ title + '"  src="http://varsom.no/Templates/Styles/Images/AvalanceWarningLevels/' + result.DangerLevel +'_standard.png"></a>';
 			tag.html(html);
 		}
 	}); 
@@ -519,17 +519,22 @@ function showLayer() {
 function ControlPanel(controlUI, map) {
   var div = document.createElement('h2');
   div.innerHTML = '<div  class="select-style"><select onchange="changeSnowData(this)">' +
+  	  '<option value="sdfsw+">Nysnø neste 3 dager</option>' +
 	  '<option value="sdfsw">Nysnø siste 3 dager</option>' +
-	  '<option value="sdfsw+">Nysnø neste 3 dager</option>' +
   	  '<option value="sd">Snødybde</option>' +
   	  '<option value="lwc">Snøtilstand</option>' +
   	  '<option value="layer">Overlagskart</option>' +
   	  '</select></div>'
   controlUI.appendChild(div);
   var div = document.createElement('div');
-  addNewSnowData(div, 'sdfsw');
+  addNewSnowData(div, 'sdfsw+');
   controlUI.appendChild(div);
-  
+  var hidebuttonDiv = document.createElement('div');
+  hidebuttonDiv.className="hidebutton";
+  hidebuttonDiv.addEventListener("click", function() {
+	  toggleLayer(); 
+  });
+  controlUI.appendChild(hidebuttonDiv);
   
 }
 function changeSnowData(obj) {
@@ -571,7 +576,7 @@ function addNewSnowData(div, type) {
     img.className ='snowmap';
     a.addEventListener("click", function() {
     	var str = '<div><img width=100% height=100% src="http://gridwms.nve.no/WMS_server/wms_server.aspx?time=' + today +'&custRefresh=0.0345173445700109&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&STYLES=&VERSION=1.1.1&LAYERS='+layer+'&SRS=EPSG:32633&BBOX=-660658.2039680962,6340571.336718777,1472673.796031904,7940571.336718776&WIDTH=800&HEIGHT=800"></div>'
-    	$('#largegallery').html(str).modal();
+    	$('#modalimage').html(str).modal();
     });
     a.appendChild(img);
     div.appendChild(a);
