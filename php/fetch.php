@@ -13,8 +13,8 @@ if ($type == "varsom") {
         $position = $_GET['position'];
 	$url = "http://www.yr.no/{$position}/varsel.xml";
 } else if ($type == "yr_position") {
-	$lat = $_GET['lat'];
-	$lon = $_GET['lon']; 
+	$lat = round($_GET['lat'], 4);
+	$lon = round($_GET['lon'], 4); 
 	$url = "http://www.yr.no/_/websvc/latlon2p.aspx?lat={$lat}&lon=${lon}&spr=nob";
 } else {
 	$x = $_GET['x'];

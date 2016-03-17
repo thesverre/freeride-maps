@@ -117,7 +117,7 @@ function addInstagram(clickedLocation, ind) {
                         var li = '<li><a onclick="openLargeGallery(' + (ind)+')"><img title="'+ title +'" src="' + media.images.thumbnail.url + '"></a></li>';
                         var m= '<li>';
                         m += '<figure><a target="_blank" href="' + media.link +'"><img src="' + media.images.standard_resolution.url + '"><figcaption>' + title + '</figcaption></a></figure>';
-                        ig +='<a target="_blank" onclick="openLargeGallery(' + (ind)+')"><img title="'+ title + '" src="' + media.images.thumbnail.url + '"></a>';
+                        ig +='<a target="_blank" onclick="openLargeGallery(' + (ind)+')"><figure><img title="'+ title + '" src="' + media.images.thumbnail.url + '"><figcaption>' + d.toDateString() + '</figcaption></figure></a>';
                         m += '</li>';
                         ind++;
                         var img = '<li><img src="' + media.images.thumbnail.url + '"></li>';
@@ -200,7 +200,7 @@ function addVarsom(latLng) {
 		var title = '';
 		if (result.AvalancheDanger) {
 			title = result.AvalancheDanger +'\n\n' + result.AvalancheWarning;
-			var html = '<a target="_blank" href="http://varsom.no/Snoskred/' + result.RegionName.replace('ø', 'o').replace('å', 'a').replace('æ', 'a') + '"><img title="'+ title + '"  src="http://varsom.no/Templates/Styles/Images/AvalanceWarningLevels/' + result.DangerLevel +'_standard.png"></a>';
+			var html = '<a target="_blank" href="http://varsom.no/Snoskred/' + result.RegionName.replace('ø', 'o').replace('å', 'a').replace('æ', 'a') + '"><img title="'+ title + '"  src="http://varsom.no/Templates/Styles/Images/AvalanceWarningLevels/' + result.DangerLevel +'_standard.png"><span>' +result.DangerLevelName + '</span></a>';
 			tag.html(html);
 		}
 	}); 
