@@ -196,6 +196,7 @@ function initializeMap() {
     google.maps.event.addListener(map, 'tilesloaded', function(event) {
         if (!loaded) {
             activateLayer('randopedia');
+	    activateLayer('bratthet');
             loaded = true;
         }
     });

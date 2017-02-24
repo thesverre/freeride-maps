@@ -12,15 +12,15 @@ function generate_sig($endpoint, $params, $secret) {
 function get($endpoint, $params) {
   $secret = '7d91f22408b24692b9caf668bb31c297';
   $fields_string = "";
-  foreach($params as $key=>$value) { 
-	$fields_string .= $key.'='.$value.'&'; 
+  foreach($params as $key=>$value) {
+	$fields_string .= $key.'='.$value.'&';
   }
   rtrim($fields_string, '&');
-  $url = "https://api.instagram.com/v1{$endpoint}?$fields_string";  
-  
+  $url = "https://api.instagram.com/v1{$endpoint}?$fields_string";
+
   $sig = generate_sig($endpoint, $params, $secret);
   $url .="&sig={$sig}";
-  
+
   $curl = curl_init();
   curl_setopt_array($curl, array(
     CURLOPT_RETURNTRANSFER => 1,
@@ -36,7 +36,7 @@ function get($endpoint, $params) {
 
 
 
-$type = $_GET['type'];  
+$type = $_GET['type'];
 $access_token = $_GET['token'];
 
 if ($type == "search") {
@@ -46,13 +46,15 @@ if ($type == "search") {
   $params = array(
 	  'lat' => $lat,
 	  'lng' => $lng,
+    'scopes' => public_content,
 	  'access_token' => $access_token,
   );
   $resp = get($endpoint, $params);
   echo $resp;
-} 
+}
 if ($type == "location-media") {
   $params = array(
+    'scopes' => public_content,
     'access_token' => $access_token,
   );
   $id = $_GET['id'];
@@ -83,5 +85,3 @@ foreach ($json_a['data'] as $place){
 echo "]";
 */
 ?>
-
-

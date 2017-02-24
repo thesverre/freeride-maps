@@ -3,18 +3,21 @@
 $type = $_GET['type'];
 if ($type == "varsom") {
   $lat = $_GET['lat'];
-  $lon = $_GET['lon']; 
+  $lon = $_GET['lon'];
   $startdate = $_GET['startdate'];
   $enddate = $_GET['enddate'];
   $url = "http://api01.nve.no/hydrology/forecast/avalanche/v2.0.2/api/AvalancheWarningByCoordinates/Detail/{$lat}/{$lon}/1/{$startdate}/{$enddate}";
 } else if ($type == "randopedia") {
-  $url = 'http://randopedia.net/randopedia/api/tourItems';
+  $url = 'https://www.randopedia.net/api/tourItems';
+} else if ($type == "instagram") {
+  $name = $_GET['name'];
+  $url = "https://www.instagram.com/explore/tags/{$name}/";
 } else if ($type == "yr") {
         $position = $_GET['position'];
 	$url = "http://www.yr.no/{$position}/varsel.xml";
 } else if ($type == "yr_position") {
 	$lat = round($_GET['lat'], 4);
-	$lon = round($_GET['lon'], 4); 
+	$lon = round($_GET['lon'], 4);
 	$url = "http://www.yr.no/_/websvc/latlon2p.aspx?lat={$lat}&lon=${lon}&spr=nob";
 } else {
 	$x = $_GET['x'];
@@ -29,7 +32,10 @@ $curl = curl_init();
 curl_setopt_array($curl, array(
     CURLOPT_RETURNTRANSFER => 1,
     CURLOPT_URL => $url,
-    CURLOPT_USERAGENT => 'cURL Request'
+    CURLOPT_USERAGENT => 'cURL Request',
+    CURLOPT_SSL_VERIFYPEER => false,
+    CURLOPT_VERBOSE => true
+
 ));
 if ($type == "varsom") {
  curl_setopt($curl, CURLOPT_HTTPHEADERS, array('Content-Type: application/json'));
@@ -40,4 +46,3 @@ curl_close($curl);
 echo $resp;
 
 ?>
-
