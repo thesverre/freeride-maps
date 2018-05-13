@@ -1,7 +1,7 @@
-function onClickMap(clickedLocation, inName, skiphistory) {
-
+function onClickMap(clickedLocation, inName, skiphistory, randopediaButton) {
 	  // https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gsradius=10000&gscoord=61.08485672110025%7C8.360595703125
 	$.get('php/fetch.php?type=yr_position&lat='+ clickedLocation.lat() + '&lon=' +clickedLocation.lng() , function(response) {
+
 		var loc = $($.parseXML( response )).find('location').first();
 		var distance = loc.attr('d');
 		var translation = loc.find('translation');
@@ -17,13 +17,13 @@ function onClickMap(clickedLocation, inName, skiphistory) {
 			history.pushState({'lat': clickedLocation.lat(), lng: clickedLocation.lng()},'Toppturkart: ' +  name, location.pathname + "#" + map.getZoom() + ',' + clickedLocation.toUrlValue());
 		}
 
-        var minihtml = '<div class="smallcontainer"><div class="overlaydummy">&nbsp;</div><div style="float:left"><h3>' + header + '</h3><div id="yr"></div><div id="varsom"></div></div>' + addSmallSnoInfo(clickedLocation) + '<div class="smallgallery"><div class="flexslider"><ul class="slides"></ul></div></div></div>';
+        var minihtml = '<div class="smallcontainer"><div class="overlaydummy">&nbsp;</div><div style="float:left"><h3>' + header + '</h3><div id="yr"></div><div id="varsom"></div></div>' + addSmallSnoInfo(clickedLocation) + '<div class="smallgallery"><div class="flexslider"><ul class="slides"></ul></div><div class=randopediainfo></div></div></div>';
         addVarsom(clickedLocation);
         addYr(path, name);
         getElevation(clickedLocation);
 
         if ($('.overlay').hasClass('overlay-expanded')) {
-            $('#overlaycontent').html(minihtml + '<div style="clear:both;" class="largecontainer">' + addLargeContainer(clickedLocation, path, name) + '</div>');
+            $('#overlaycontent').html(minihtml + '<div style="clear:both;" class="largecontainer">' + addLargeContainer(clickedLocation, path, name)  + '</div>');
             $('.largecontainer').data('data', [clickedLocation, path, name]);
         } else {
         	$('.controlpanelContainer').addClass('open');
@@ -31,6 +31,9 @@ function onClickMap(clickedLocation, inName, skiphistory) {
             $('#overlaycontent').html(minihtml + '<div style="clear:both;display:none" class="largecontainer">' + '</div>');
             $('.largecontainer').data('data', [clickedLocation, path, name] );
         };
+				if (randopediaButton) {
+					$('.randopediainfo').html(randopediaButton);
+				}
 
 		if (!$('.overlay').hasClass('open')) {
 			toggleOverlay();
@@ -305,7 +308,7 @@ function addSnoLayer(latLng, layer, name) {
 	var enddate = toDateStringISO(addDays(new Date(), 3));
 
 	var p = proj4(epsg32633).forward([ latLng.lng(), latLng.lat() ]);
-	var pos = p[0] + ";" + p[1];
+	var pos = Math.round(p[0]) + ";" + Math.round(p[1]);
 	name = name + ' <span id="info_' + layer + '"></span>';
 	var result = getImg(
 			latLng,
@@ -313,7 +316,7 @@ function addSnoLayer(latLng, layer, name) {
 					+ date
 					+ '&custRefresh=0.1345073445700109&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=TRUE&STYLES=&VERSION=1.1.1&LAYERS='
 					+ layer + '&SRS=EPSG:32633&BBOX=', latLng, name);
-	$.get('php/fetch.php?type=nve&x=' + p[0] + '&y=' + p[1] + '&layer=' + layer
+	$.get('php/fetch.php?type=nve&x=' + Math.round(p[0]) + '&y=' + Math.round(p[1]) + '&layer=' + layer
 			+ '&startdate=' + startdate + '&enddate=' + enddate, function(
 			result) {
 		result = $.parseJSON(result);
@@ -349,7 +352,7 @@ function addSmallSnoInfo(latLng) {
 
     var p = proj4(epsg32633).forward([ latLng.lng(), latLng.lat() ]);
     var pos = p[0] + ";" + p[1];
-    var url = 'php/fetch.php?type=nve&x=' + p[0] + '&y=' + p[1] +  '&startdate=' + startdate + '&enddate=' + enddate+ '&layer=';
+    var url = 'php/fetch.php?type=nve&x=' + Math.round(p[0]) + '&y=' + Math.round(p[1]) +  '&startdate=' + startdate + '&enddate=' + enddate+ '&layer=';
     var html = '';
     $.get(url + 'sd', function(result) {
         result = $.parseJSON(result);
@@ -627,7 +630,7 @@ function addNewSnow(type, id, name, latLngArray) {
 
     var p = proj4(epsg32633).forward([ latLng.lng(), latLng.lat() ]);
     var pos = p[0] + ";" + p[1];
-    var url = 'php/fetch.php?type=nve&x=' + p[0] + '&y=' + p[1] +  '&startdate=' + startdate + '&enddate=' + enddate+ '&layer=';
+    var url = 'php/fetch.php?type=nve&x=' + Math.round(p[0]) + '&y=' + Math.round(p[1]) +  '&startdate=' + startdate + '&enddate=' + enddate+ '&layer=';
 
     $.get(url + type, function(result) {
         result = $.parseJSON(result);
@@ -762,50 +765,59 @@ function activateLayer(layerId) {
     	                });
     	                var poly = new google.maps.Polyline(opts);
     	                google.maps.event.addListener(poly, 'mouseup', function(event) {
-    	                    elevator.getElevationAlongPath({
-    	                        'path': path,
-    	                        'samples': 20
-    	                      }, function(results, status) {
-    	                          if (status != google.maps.ElevationStatus.OK) {
-    	                                return;
-    	                          }
-    	                          elevationpath = results;
-    	                          var msg = addPoly(poly, results, 'M -1,0 0,-1 1,0 0,1 z');
-    	                          var content = '<h3>' + item.name + '(' ;
-    	                          if (f.rando_type == 10) {
-    	                        	  content += 'Opp- og nedstinging';
-    	                          } else if (f.rando_type == 11) {
-    	                        	  content += 'Opptur';
-    	                          } else if (f.rando_type == 12) {
-    	                        	  content += 'Nedover';
-    	                          }
-    	                          content += ')</h3>';
-    	                          content += '<p>' + item.shortDescription + '</p>';
-    	                          content += '<figure><div style="width:300px" id="elevation_chart"></div>';
-    	                          content += '<figcaption>'  +msg + ' </figcaption></figure>';
-    	                          content += '<p>Se detaljer på <a style="color:black" target="_blank" href="http://randopedia.net/tours/'+ item.id  +'">randopedia.net</a></p>';
+												var button = document.createElement('button');
+												button.innerHTML="Vis høydekurver";
+												onClickMap(event.latLng, null, false, button);
+												elevator.getElevationAlongPath({
+														'path': path,
+														'samples': 20
+													}, function(results, status) {
+															if (status != google.maps.ElevationStatus.OK) {
+																		return;
+															}
+															elevationpath = results;
+															var msg = addPoly(poly, results, 'M -1,0 0,-1 1,0 0,1 z');
+															var content = '<h3>' + item.name + '(' ;
+															if (f.rando_type == 10) {
+																content += 'Opp- og nedstinging';
+															} else if (f.rando_type == 11) {
+																content += 'Opptur';
+															} else if (f.rando_type == 12) {
+																content += 'Nedover';
+															}
+															content += ')</h3>';
+															content += '<p>' + item.shortDescription + '</p>';
+															content += '<figure><div style="width:300px" id="elevation_chart"></div>';
+															content += '<figcaption>'  +msg + ' </figcaption></figure>';
+															content += '<p>Se detaljer på <a style="color:black" target="_blank" href="http://randopedia.net/tours/'+ item.id  +'">randopedia.net</a></p>';
 
-    	                          var coordInfoWindow = new google.maps.InfoWindow();
-    	                          coordInfoWindow.setContent(content);
-    	                          coordInfoWindow.setPosition(event.latLng);
-    	                          coordInfoWindow.open(map);
-    	                          google.maps.event.addListener(coordInfoWindow, 'domready', function(event) {
-    	                        	  var data = new google.visualization.DataTable();
-        	                          data.addColumn('string', 'Sample');
-        	                          data.addColumn('number', 'Høyde over havet');
-        	                          for (var i = 0; i < results.length; i++) {
-        	                            data.addRow(['', results[i].elevation]);
-        	                          }
-        	                          var chart = new google.visualization.ColumnChart(document.getElementById('elevation_chart'));
-        	                          chart.draw(data, {
-        	                            height: 150,
-        	                            legend: 'none',
-        	                            titleY: 'Høyde over havet (m)'
-        	                          });
-    	                          });
-    	                          onClickMap(event.latLng);
+															button.addEventListener('click', function() {
+																var coordInfoWindow = new google.maps.InfoWindow();
+																coordInfoWindow.setContent(content);
+																coordInfoWindow.setPosition(event.latLng);
+																coordInfoWindow.open(map);
 
-    	                      });
+
+																google.maps.event.addListener(coordInfoWindow, 'domready', function(event) {
+																	var data = new google.visualization.DataTable();
+																		data.addColumn('string', 'Sample');
+																		data.addColumn('number', 'Høyde over havet');
+																		for (var i = 0; i < results.length; i++) {
+																			data.addRow(['', results[i].elevation]);
+																		}
+																		var chart = new google.visualization.ColumnChart(document.getElementById('elevation_chart'));
+																		chart.draw(data, {
+																			height: 150,
+																			legend: 'none',
+																			titleY: 'Høyde over havet (m)'
+																		});
+																});
+															});
+
+
+
+													});
+
     	                    return true;
     	                } );
 	                }
@@ -815,6 +827,10 @@ function activateLayer(layerId) {
 	    });
 	}
 }
+
+
+
+
 
 function addYrLayer(layerId) {
 	var d = new Date();
